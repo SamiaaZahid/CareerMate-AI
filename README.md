@@ -50,9 +50,11 @@ Built collaboratively as part of the Mobile App Development with Flutter Virtual
 
 ## **Getting Started**
 
-```bash
+
 flutter pub get
 flutter run
+```bash
+
 ## **Navigation Flow**
 
 * **Step 1:** Login/Signup
