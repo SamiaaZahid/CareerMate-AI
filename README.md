@@ -55,6 +55,10 @@ flutter pub get
 flutter run
 ## **Navigation Flow**
 
-```text
-Login/Signup → Home (Dashboard) → Profile (with CV Upload) → Resume Analysis & Recommendations → Skill Roadmap / AI Chat
+* **Step 1:** Login/Signup
+* **Step 2:** Home (Dashboard)
+* **Step 3:** Profile (with CV Upload)
+* **Step 4:** Resume Analysis & Recommendations
+* **Step 5:** Skill Roadmap / AI Chat
+
 
