@@ -1,0 +1,460 @@
+import 'package:flutter/material.dart';
+
+import 'login_screen.dart';
+import 'profile_screen.dart';
+import 'resume_analysis_screen.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  static const Color _backgroundColor = Color(0xFFF5F5F7);
+  static const Color _primaryColor = Color(0xFF54309C);
+  static const Color _borderColor = Color(0xFFE8E1F5);
+  static const Color _inactiveColor = Color(0xFF8B8B98);
+
+  TextStyle get _headlineStyle => const TextStyle(
+        fontFamily: 'Be Vietnam Pro',
+        fontFamilyFallback: ['sans-serif'],
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1F1F28),
+      );
+
+  TextStyle get _sectionStyle => const TextStyle(
+        fontFamily: 'Be Vietnam Pro',
+        fontFamilyFallback: ['sans-serif'],
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1F1F28),
+      );
+
+  TextStyle get _cardTitleStyle => const TextStyle(
+        fontFamily: 'Be Vietnam Pro',
+        fontFamilyFallback: ['sans-serif'],
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF1F1F28),
+      );
+
+  TextStyle get _bodyStyle => const TextStyle(
+        fontFamily: 'Be Vietnam Pro',
+        fontFamilyFallback: ['sans-serif'],
+        fontSize: 14,
+        color: Color(0xFF6F6F7B),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _backgroundColor,
+      appBar: AppBar(
+        backgroundColor: _primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
+        title: Row(
+          children: const [
+            Icon(Icons.auto_awesome_rounded, size: 22),
+            SizedBox(width: 8),
+            Text(
+              'CareerMate AI',
+              style: TextStyle(
+                fontFamily: 'Be Vietnam Pro',
+                fontFamilyFallback: ['sans-serif'],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Color(0x33FFFFFF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.person,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome back, Alex!',
+                style: _headlineStyle,
+              ),
+              const SizedBox(height: 20),
+              _StatusCard(
+                title: 'Profile Completeness',
+                titleStyle: _sectionStyle,
+                borderColor: _borderColor,
+                content: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2EDFC),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '60%',
+                          style: TextStyle(
+                            fontFamily: 'Be Vietnam Pro',
+                            fontFamilyFallback: ['sans-serif'],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: _primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Almost there',
+                            style: TextStyle(
+                              fontFamily: 'Be Vietnam Pro',
+                              fontFamilyFallback: ['sans-serif'],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4C4C58),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(999)),
+                            child: LinearProgressIndicator(
+                              value: 0.6,
+                              minHeight: 8,
+                              backgroundColor: Color(0xFFEDEAF7),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF4A90E2),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              _StatusCard(
+                title: 'CV Status',
+                titleStyle: _sectionStyle,
+                borderColor: _borderColor,
+                content: Row(
+                  children: const [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: Color(0xFF2FA84F),
+                      size: 24,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'CV uploaded successfully',
+                        style: TextStyle(
+                          fontFamily: 'Be Vietnam Pro',
+                          fontFamilyFallback: ['sans-serif'],
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF4C4C58),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text('Explore Tools', style: _sectionStyle),
+              const SizedBox(height: 16),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.05,
+                children: [
+                  _ToolCard(
+                    icon: Icons.description_outlined,
+                    label: 'Resume Analysis',
+                    labelStyle: _cardTitleStyle,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResumeAnalysisScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _ToolCard(
+                    icon: Icons.work_outline,
+                    label: 'Internships',
+                    labelStyle: _cardTitleStyle,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Internships coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+                  _ToolCard(
+                    icon: Icons.school_outlined,
+                    label: 'Scholarships',
+                    labelStyle: _cardTitleStyle,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Scholarships coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+                  _ToolCard(
+                    icon: Icons.trending_up_outlined,
+                    label: 'Skill Roadmap',
+                    labelStyle: _cardTitleStyle,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Skill Roadmap coming soon'),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('AI Career Chat coming soon')),
+                    );
+                  },
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: const Text(
+                    'AI Career Chat',
+                    style: TextStyle(
+                      fontFamily: 'Be Vietnam Pro',
+                      fontFamilyFallback: ['sans-serif'],
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _primaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: _primaryColor,
+        unselectedItemColor: _inactiveColor,
+        selectedLabelStyle: const TextStyle(
+          fontFamily: 'Be Vietnam Pro',
+          fontFamilyFallback: ['sans-serif'],
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Be Vietnam Pro',
+          fontFamilyFallback: ['sans-serif'],
+          fontWeight: FontWeight.w600,
+        ),
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ResumeAnalysisScreen(),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileScreen(),
+              ),
+            );
+          } else if (index == 3) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Settings coming soon')),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard_rounded),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics_outlined),
+            label: 'Analysis',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusCard extends StatelessWidget {
+  const _StatusCard({
+    required this.title,
+    required this.titleStyle,
+    required this.borderColor,
+    required this.content,
+  });
+
+  final String title;
+  final TextStyle titleStyle;
+  final Color borderColor;
+  final Widget content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: titleStyle),
+          const SizedBox(height: 14),
+          content,
+        ],
+      ),
+    );
+  }
+}
+
+class _ToolCard extends StatelessWidget {
+  const _ToolCard({
+    required this.icon,
+    required this.label,
+    required this.labelStyle,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final TextStyle labelStyle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE8E1F5)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x10000000),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2EDFC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: _HomeIconColor.iconColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(label, style: labelStyle),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeIconColor {
+  static const Color iconColor = Color(0xFF54309C);
+}
