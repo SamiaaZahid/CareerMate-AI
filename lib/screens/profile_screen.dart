@@ -1,10 +1,13 @@
 import 'dart:math' as math;
+import '../services/auth_service.dart';
 
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
-import 'login_screen.dart';
 import 'resume_analysis_screen.dart';
+import '../constants/app_colors.dart';
+import 'package:file_picker/file_picker.dart';
+import '../services/db_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,9 +23,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const Color _inactiveColor = Color(0xFF8B8B98);
   static const Color _successColor = Color(0xFF2FA84F);
 
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _degreeController = TextEditingController();
+  final TextEditingController _collegeController = TextEditingController();
+  final TextEditingController _preferredLocationController = TextEditingController();
+  final TextEditingController _careerGoalsController = TextEditingController();
+
   int _selectedIndex = 2;
   String _selectedYear = '3rd Year';
   final List<String> _skills = ['Data Analysis', 'Python', 'UX Design'];
+  String? _resumePath;
+  String? _photoPath;
+  String? _fullName;
   final List<String> _yearOptions = const [
     '1st Year',
     '2nd Year',
@@ -31,13 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Graduate',
   ];
 
-  TextStyle get _headlineStyle => const TextStyle(
-        fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
-      );
+  
 
   TextStyle get _sectionStyle => const TextStyle(
         fontFamily: 'Be Vietnam Pro',
@@ -47,13 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: Color(0xFF1F1F28),
       );
 
-  TextStyle get _labelStyle => const TextStyle(
-        fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFF1F1F28),
-      );
+  
 
   TextStyle get _fieldStyle => const TextStyle(
         fontFamily: 'Be Vietnam Pro',
@@ -61,6 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         fontSize: 15,
         color: Color(0xFF1F1F28),
       );
+  
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +124,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 14),
+                    if (_fullName != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          _fullName!,
+                          style: const TextStyle(
+                            fontFamily: 'Be Vietnam Pro',
+                            fontFamilyFallback: ['sans-serif'],
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1F1F28),
+                          ),
+                        ),
+                      ),
+                    if (_photoPath != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'Photo saved',
+                          style: TextStyle(
+                            fontFamily: 'Be Vietnam Pro',
+                            fontFamilyFallback: ['sans-serif'],
+                            fontSize: 12,
+                            color: _successColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     SizedBox(
                       height: 40,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final result = await FilePicker.pickFiles(
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'jpeg', 'png'],
+                          );
+                          if (result.isEmpty) return;
+                          final file = result.first;
+                          try {
+                            final userId = AuthService.instance.currentUserId;
+                            if (userId == null) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to update your profile')));
+                              return;
+                            }
+                            await DbService.instance.updateUserById(userId, {'photo_path': file.path});
+                            if (!context.mounted) return;
+                            final messenger = ScaffoldMessenger.of(context);
+                            final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                                backgroundColor: AppColors.primaryPurple,
+                                content: Text('Profile photo updated: ${file.name}', style: const TextStyle(color: Colors.white)),
+                              ),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            final messenger = ScaffoldMessenger.of(context);
+                            final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                                backgroundColor: AppColors.primaryPurple,
+                                content: Text('Failed to save photo: $e', style: const TextStyle(color: Colors.white)),
+                              ),
+                            );
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primaryColor,
+                          backgroundColor: AppColors.accentOrange,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -150,10 +218,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                    // Load user data on first build
+                    FutureBuilder(
+                      future: _loadUser(),
+                      builder: (context, snapshot) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
               _FieldGroup(
                 label: 'Full Name',
                 child: TextField(
+                  controller: _fullNameController,
                   style: _fieldStyle,
                   decoration: _inputDecoration(
                     hintText: 'Enter your full name',
@@ -165,6 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _FieldGroup(
                 label: 'Education/Degree',
                 child: TextField(
+                  controller: _degreeController,
                   style: _fieldStyle,
                   decoration: _inputDecoration(
                     hintText: 'e.g. BSc Computer Science',
@@ -176,6 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _FieldGroup(
                 label: 'College/Institution',
                 child: TextField(
+                  controller: _collegeController,
                   style: _fieldStyle,
                   decoration: _inputDecoration(
                     hintText: 'Enter college or institution',
@@ -187,7 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _FieldGroup(
                 label: 'Year of Study',
                 child: DropdownButtonFormField<String>(
-                  value: _selectedYear,
+                  initialValue: _selectedYear,
                   style: _fieldStyle,
                   iconEnabledColor: _primaryColor,
                   decoration: _inputDecoration(
@@ -214,6 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _FieldGroup(
                 label: 'Preferred Location',
                 child: TextField(
+                  controller: _preferredLocationController,
                   style: _fieldStyle,
                   decoration: _inputDecoration(
                     hintText: 'Enter preferred location',
@@ -285,6 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _FieldGroup(
                 label: 'Career Goals',
                 child: TextField(
+                  controller: _careerGoalsController,
                   style: _fieldStyle,
                   maxLines: 3,
                   decoration: _inputDecoration(
@@ -297,11 +377,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text('Resume / CV', style: _sectionStyle),
               const SizedBox(height: 12),
               _UploadArea(
-                primaryColor: _primaryColor,
-                onChooseFile: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('File picker coming soon')),
+                primaryColor: AppColors.accentOrange,
+                onChooseFile: () async {
+                  final result = await FilePicker.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf', 'doc', 'docx'],
                   );
+                  if (result.isEmpty) return;
+                  final file = result.first;
+                  // save path to DB (example: upsert user with resume_path)
+                  try {
+                    final userId = AuthService.instance.currentUserId;
+                    if (userId == null) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to upload your resume')));
+                      return;
+                    }
+                    await DbService.instance.updateUserById(userId, {'resume_path': file.path});
+                    if (!context.mounted) return;
+                    final messenger = ScaffoldMessenger.of(context);
+                    final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                    messenger.showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                        backgroundColor: AppColors.primaryPurple,
+                        content: Text('Uploaded: ${file.name}', style: const TextStyle(color: Colors.white)),
+                      ),
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    final messenger = ScaffoldMessenger.of(context);
+                    final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                    messenger.showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                        backgroundColor: AppColors.primaryPurple,
+                        content: Text('Failed to save file: $e', style: const TextStyle(color: Colors.white)),
+                      ),
+                    );
+                  }
                 },
               ),
               const SizedBox(height: 16),
@@ -340,10 +456,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(999),
-                      child: const LinearProgressIndicator(
-                        value: 1,
+                      child: LinearProgressIndicator(
+                        value: _resumePath != null ? 1 : 0,
                         minHeight: 8,
-                        backgroundColor: Color(0xFFE4F5E8),
+                        backgroundColor: const Color(0xFFE4F5E8),
                         valueColor: AlwaysStoppedAnimation<Color>(_successColor),
                       ),
                     ),
@@ -355,16 +471,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Profile saved')),
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
+                  onPressed: () async {
+                    final userId = AuthService.instance.currentUserId;
+                    if (userId == null) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please log in before saving your profile')),
+                      );
+                      return;
+                    }
+
+                    final payload = {
+                      'name': _fullNameController.text.trim(),
+                      'degree': _degreeController.text.trim(),
+                      'college': _collegeController.text.trim(),
+                      'year_of_study': _selectedYear,
+                      'preferred_location': _preferredLocationController.text.trim(),
+                      'skills': _skills.join(', '),
+                      'career_goals': _careerGoalsController.text.trim(),
+                    };
+
+                    final updated = await DbService.instance.updateUserById(userId, payload);
+                    if (!context.mounted) return;
+                    if (updated > 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profile saved')),
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Unable to save profile')),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.save_outlined),
                   label: const Text(
@@ -377,7 +520,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
+                    backgroundColor: AppColors.accentOrange,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -452,6 +595,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _loadUser() async {
+    final userId = AuthService.instance.currentUserId;
+    if (userId == null) return;
+    final user = await DbService.instance.getUserById(userId);
+    if (user == null) return;
+    if (!mounted) return;
+
+    final storedSkills = (user['skills'] as String?) ?? '';
+    final parsedSkills = storedSkills.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+    setState(() {
+      _fullName = user['name'] as String?;
+      _resumePath = user['resume_path'] as String?;
+      _photoPath = user['photo_path'] as String?;
+      _selectedYear = (user['year_of_study'] as String?) ?? _selectedYear;
+      _fullNameController.text = _fullName ?? '';
+      _degreeController.text = (user['degree'] as String?) ?? '';
+      _collegeController.text = (user['college'] as String?) ?? '';
+      _preferredLocationController.text = (user['preferred_location'] as String?) ?? '';
+      _careerGoalsController.text = (user['career_goals'] as String?) ?? '';
+      if (parsedSkills.isNotEmpty) {
+        _skills
+          ..clear()
+          ..addAll(parsedSkills);
+      }
+    });
   }
 
   InputDecoration _inputDecoration({

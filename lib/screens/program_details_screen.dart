@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
 
-const Color kDetailsPrimaryColor = Color(0xFF54309C);
+const Color kDetailsPrimaryColor = AppColors.primaryPurple;
 const Color kDetailsBackgroundColor = Color(0xFFF5F5F7);
 const Color kDetailsBorderColor = Color(0xFFE8E1F5);
 
@@ -102,7 +103,7 @@ class ProgramDetailsScreen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: kDetailsPrimaryColor,
+                    backgroundColor: AppColors.accentOrange,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
