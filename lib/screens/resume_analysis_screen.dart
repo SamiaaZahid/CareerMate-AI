@@ -9,6 +9,7 @@ import '../constants/app_colors.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'program_details_screen.dart';
+import 'settings_screen.dart';
 
 const Color kAnalysisBackgroundColor = Color(0xFFF5F5F7);
 const Color kAnalysisPrimaryColor = AppColors.primaryPurple;
@@ -287,8 +288,11 @@ final List<RecommendationItemData> _internships = const [
               ),
             );
           } else if (index == 3) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Settings coming soon')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
             );
           }
         },

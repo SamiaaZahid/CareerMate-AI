@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
 import 'resume_analysis_screen.dart';
+import 'settings_screen.dart';
 import '../constants/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/db_service.dart';
@@ -569,8 +570,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             );
           } else if (index == 3) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Settings coming soon')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
             );
           }
         },
