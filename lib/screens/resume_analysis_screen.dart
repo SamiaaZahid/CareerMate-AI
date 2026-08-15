@@ -3,12 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/recommendation_item.dart';
+import '../services/db_service.dart';
+import '../services/auth_service.dart';
+import '../constants/app_colors.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'program_details_screen.dart';
 
 const Color kAnalysisBackgroundColor = Color(0xFFF5F5F7);
-const Color kAnalysisPrimaryColor = Color(0xFF54309C);
+const Color kAnalysisPrimaryColor = AppColors.primaryPurple;
 const Color kAnalysisBorderColor = Color(0xFFE8E1F5);
 const Color kAnalysisInactiveColor = Color(0xFF8B8B98);
 const TextStyle kAnalysisCardTitleStyle = TextStyle(
@@ -146,10 +149,47 @@ final List<RecommendationItemData> _internships = const [
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 360),
-                  child: Text(
-                    'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
-                    textAlign: TextAlign.center,
-                    style: _bodyStyle,
+                    child: Column(
+                    children: [
+                      Text(
+                        'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
+                        textAlign: TextAlign.center,
+                        style: _bodyStyle,
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search jobs or keywords',
+                          prefixIcon: const Icon(Icons.search, color: AppColors.accentOrange),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onSubmitted: (q) async {
+                          if (q.trim().isEmpty) return;
+                          final messenger = ScaffoldMessenger.of(context);
+                          final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                          final userId = AuthService.instance.currentUserId;
+                          if (userId == null) {
+                            messenger.showSnackBar(const SnackBar(content: Text('Please log in to save searches')));
+                            return;
+                          }
+                          await DbService.instance.addSearch(userId, q.trim());
+                          if (!context.mounted) return;
+                          messenger.showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                              backgroundColor: kAnalysisPrimaryColor,
+                              content: Text('Saved search: $q', style: const TextStyle(color: Colors.white)),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -598,7 +638,7 @@ class _RecommendationSection extends StatelessWidget {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kAnalysisPrimaryColor,
+                          backgroundColor: AppColors.accentOrange,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(

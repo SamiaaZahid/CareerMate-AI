@@ -1,0 +1,170 @@
+[ +564 ms] Unable to locate an Android SDK.
+[   +5 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +2 ms] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[        ] executing: [C:\Users\kusha\OneDrive\Desktop\Flutter\flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[  +86 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2026-08-05 10:04:07 -0700
+[  +16 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +37 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +2 ms] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +37 ms] Skipping pub get: version match.
+[ +102 ms] Found plugin sqflite at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite-2.4.3\
+[   +5 ms] Found plugin sqflite_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_darwin-2.4.3+1\
+[   +2 ms] Found plugin sqflite_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_android-2.4.3\
+[   +2 ms] Found plugin shared_preferences at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.5\
+[   +2 ms] Found plugin shared_preferences_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +2 ms] Found plugin path_provider_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +1 ms] Found plugin shared_preferences_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +1 ms] Found plugin shared_preferences_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[   +1 ms] Found plugin path_provider_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.2\
+[   +1 ms] Found plugin shared_preferences_foundation at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[        ] Found plugin shared_preferences_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.27\
+[   +1 ms] Found plugin file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker-12.0.0\
+[        ] Found plugin windows_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\windows_file_picker-1.0.0\
+[   +4 ms] Found plugin file_picker_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_web-3.0.0\
+[   +1 ms] Found plugin file_picker_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_linux-1.0.0\
+[   +3 ms] Found plugin file_picker_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_darwin-1.0.0\
+[   +1 ms] Found plugin android_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\android_file_picker-1.0.0\
+[  +59 ms] Found plugin sqflite at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite-2.4.3\
+[   +7 ms] Found plugin sqflite_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_darwin-2.4.3+1\
+[   +1 ms] Found plugin sqflite_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_android-2.4.3\
+[   +1 ms] Found plugin shared_preferences at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.5\
+[   +1 ms] Found plugin shared_preferences_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +1 ms] Found plugin path_provider_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +1 ms] Found plugin shared_preferences_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +1 ms] Found plugin shared_preferences_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[   +1 ms] Found plugin path_provider_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.2\
+[   +3 ms] Found plugin shared_preferences_foundation at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +1 ms] Found plugin shared_preferences_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.27\
+[   +2 ms] Found plugin file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker-12.0.0\
+[   +1 ms] Found plugin windows_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\windows_file_picker-1.0.0\
+[   +4 ms] Found plugin file_picker_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_web-3.0.0\
+[   +1 ms] Found plugin file_picker_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_linux-1.0.0\
+[   +4 ms] Found plugin file_picker_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_darwin-1.0.0\
+[   +1 ms] Found plugin android_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\android_file_picker-1.0.0\
+[   +7 ms] Skipping generating web_plugin_registrant.dart because it is up-to-date.
+[  +29 ms] Found plugin sqflite at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite-2.4.3\
+[   +2 ms] Found plugin sqflite_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_darwin-2.4.3+1\
+[        ] Found plugin sqflite_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_android-2.4.3\
+[        ] Found plugin shared_preferences at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.5\
+[        ] Found plugin shared_preferences_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[   +1 ms] Found plugin path_provider_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +1 ms] Found plugin shared_preferences_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +1 ms] Found plugin shared_preferences_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[        ] Found plugin path_provider_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.2\
+[   +1 ms] Found plugin shared_preferences_foundation at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +2 ms] Found plugin shared_preferences_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.27\
+[   +1 ms] Found plugin file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker-12.0.0\
+[   +1 ms] Found plugin windows_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\windows_file_picker-1.0.0\
+[   +3 ms] Found plugin file_picker_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_web-3.0.0\
+[        ] Found plugin file_picker_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_linux-1.0.0\
+[   +2 ms] Found plugin file_picker_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_darwin-1.0.0\
+[        ] Found plugin android_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\android_file_picker-1.0.0\
+[   +2 ms] Generating C:\Users\kusha\CareerMate-AI\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java
+[        ] Skipping generating GeneratedPluginRegistrant.java because it is up-to-date.
+[   +2 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[        ] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[        ] Skipping generating generated_plugins.cmake because it is up-to-date.
+[   +1 ms] Skipping generating GeneratedPluginRegistrant.h because it is up-to-date.
+[        ] Skipping generating GeneratedPluginRegistrant.m because it is up-to-date.
+[   +1 ms] Skipping generating GeneratedPluginRegistrant.swift because it is up-to-date.
+[ +130 ms] Initializing file store
+[   +6 ms] Skipping target: gen_localizations
+[   +1 ms] gen_dart_plugin_registrant: Starting due to {InvalidatedReasonKind.inputChanged: The following inputs have updated contents: C:\Users\kusha\CareerMate-AI\.dart_tool\package_config.json}
+[  +43 ms] Found plugin sqflite at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite-2.4.3\
+[   +2 ms] Found plugin sqflite_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_darwin-2.4.3+1\
+[   +1 ms] Found plugin sqflite_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\sqflite_android-2.4.3\
+[        ] Found plugin shared_preferences at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences-2.5.5\
+[   +1 ms] Found plugin shared_preferences_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_windows-2.4.1\
+[  +13 ms] Found plugin path_provider_windows at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +1 ms] Found plugin shared_preferences_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_web-2.4.3\
+[   +1 ms] Found plugin shared_preferences_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_linux-2.4.1\
+[        ] Found plugin path_provider_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.2\
+[   +2 ms] Found plugin shared_preferences_foundation at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_foundation-2.5.6\
+[   +1 ms] Found plugin shared_preferences_android at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.27\
+[   +2 ms] Found plugin file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker-12.0.0\
+[   +1 ms] Found plugin windows_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\windows_file_picker-1.0.0\
+[   +3 ms] Found plugin file_picker_web at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_web-3.0.0\
+[        ] Found plugin file_picker_linux at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_linux-1.0.0\
+[   +4 ms] Found plugin file_picker_darwin at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\file_picker_darwin-1.0.0\
+[        ] Found plugin android_file_picker at C:\Users\kusha\AppData\Local\Pub\Cache\hosted\pub.dev\android_file_picker-1.0.0\
+[   +6 ms] gen_dart_plugin_registrant: Complete
+[   +1 ms] Skipping target: _composite
+[        ] complete
+[   +2 ms] Launching lib\main.dart on Windows in debug mode...
+[   +1 ms] C:\Users\kusha\OneDrive\Desktop\Flutter\flutter\bin\cache\dart-sdk\bin\dartaotruntime.exe C:\Users\kusha\OneDrive\Desktop\Flutter\flutter\bin\cache\dart-sdk\bin\snapshots\frontend_server_aot.dart.snapshot --sdk-root C:\Users\kusha\OneDrive\Desktop\Flutter\flutter\bin\cache\artifacts\engine\common\flutter_patched_sdk/ --incremental --target=flutter --experimental-emit-debug-metadata -DFLUTTER_VERSION=3.44.9 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=6b182d2c75 -DFLUTTER_ENGINE_REVISION=5a2a6a42cc -DFLUTTER_DART_VERSION=3.12.2 --output-dill C:\Users\kusha\AppData\Local\Temp\flutter_tools.ce524104\flutter_tool.92128c1d\app.dill --packages C:\Users\kusha\CareerMate-AI\.dart_tool\package_config.json -Ddart.vm.profile=false -Ddart.vm.product=false --enable-asserts --track-widget-creation --filesystem-scheme org-dartlang-root --initialize-from-dill build\5846cd4b36d3245dd278aabec0ee7e7d.cache.dill.track.dill --source file:///C:/Users/kusha/CareerMate-AI/.dart_tool/flutter_build/dart_plugin_registrant.dart --source package:flutter/src/dart_plugin_registrant.dart -Dflutter.dart_plugin_registrant=file:///C:/Users/kusha/CareerMate-AI/.dart_tool/flutter_build/dart_plugin_registrant.dart --verbosity=error --enable-experiment=alternative-invalidation-strategy
+[  +30 ms] <- compile package:careermate_ai/main.dart
+[+10054 ms] Error: No Windows desktop project configured. See https://flutter.dev/to/add-desktop-support to learn about adding Windows support to a project.
+[   +1 ms] "flutter run" took 10,715ms.
+[  +25 ms] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+           #1      RunCommand.runCommand (package:flutter_tools/src/commands/run.dart:940:9)
+           <asynchronous suspension>
+           #2      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1630:27)
+           <asynchronous suspension>
+           #3      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #4      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #5      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:496:9)
+           <asynchronous suspension>
+           #6      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:431:5)
+           <asynchronous suspension>
+           #8      FlutterCommandRunner.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:307:33)
+           <asynchronous suspension>
+           #9      run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:104:11)
+           <asynchronous suspension>
+           #10     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #11     main (package:flutter_tools/executable.dart:103:3)
+           <asynchronous suspension>
+
+
+[        ] Running 3 shutdown hooks
+[   +8 ms] Shutdown hooks complete
+[  +66 ms] exiting with code 1

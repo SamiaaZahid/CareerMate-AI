@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'login_screen.dart';
+import '../constants/app_colors.dart';
+import '../services/auth_service.dart';
+import '../services/db_service.dart';
 import 'profile_screen.dart';
 import 'resume_analysis_screen.dart';
 
@@ -13,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  String? _profileName;
 
   static const Color _backgroundColor = Color(0xFFF5F5F7);
   static const Color _primaryColor = Color(0xFF54309C);
@@ -43,12 +46,30 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Color(0xFF1F1F28),
       );
 
-  TextStyle get _bodyStyle => const TextStyle(
-        fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
-        fontSize: 14,
-        color: Color(0xFF6F6F7B),
-      );
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileName();
+  }
+
+  Future<void> _loadProfileName() async {
+    final userId = AuthService.instance.currentUserId;
+    if (userId == null) {
+      if (mounted) {
+        setState(() => _profileName = null);
+      }
+      return;
+    }
+
+    final user = await DbService.instance.getUserById(userId);
+    final name = (user?['name'] as String?)?.trim();
+
+    if (mounted) {
+      setState(() {
+        _profileName = name?.isNotEmpty == true ? name : null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome back, Alex!',
+                _profileName == null || _profileName!.trim().isEmpty
+                    ? 'Welcome back!'
+                    : 'Welcome back, $_profileName!',
                 style: _headlineStyle,
               ),
               const SizedBox(height: 20),
@@ -131,11 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Almost there',
                             style: TextStyle(
                               fontFamily: 'Be Vietnam Pro',
@@ -145,10 +168,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Color(0xFF4C4C58),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(999)),
-                            child: LinearProgressIndicator(
+                            borderRadius: BorderRadius.circular(999),
+                            child: const LinearProgressIndicator(
                               value: 0.6,
                               minHeight: 8,
                               backgroundColor: Color(0xFFEDEAF7),
@@ -274,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
+                    backgroundColor: AppColors.accentOrange,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -456,5 +479,5 @@ class _ToolCard extends StatelessWidget {
 }
 
 class _HomeIconColor {
-  static const Color iconColor = Color(0xFF54309C);
+  static const Color iconColor = AppColors.accentOrange;
 }

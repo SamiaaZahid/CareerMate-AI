@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
-  static const Color primaryColor = Color(0xFF54309C);
-  static const Color accentColor = Color(0xFF4A90E2);
+  static const Color primaryColor = AppColors.primaryPurple;
+  static const Color accentColor = AppColors.accentOrange;
   static const Color backgroundColor = Color(0xFFF5F5F7);
 
   @override
@@ -16,6 +18,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   TextStyle get _headlineStyle => const TextStyle(
         fontFamily: 'Be Vietnam Pro',
@@ -112,6 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text('Email Address', style: _labelStyle),
                     const SizedBox(height: 8),
                     TextField(
+                      controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       style: _fieldStyle,
                       decoration: InputDecoration(
@@ -171,6 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextField(
+                      controller: _passwordController,
                       obscureText: _obscurePassword,
                       style: _fieldStyle,
                       decoration: InputDecoration(
@@ -221,31 +228,62 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 54,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                if (!mounted) return;
+                                setState(() => _isLoading = true);
+                                try {
+                                  final email = _emailController.text.trim();
+                                  final password = _passwordController.text;
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  if (email.isEmpty || password.isEmpty) {
+                                    messenger.showSnackBar(
+                                      const SnackBar(content: Text('Please provide email and password')),
+                                    );
+                                    return;
+                                  }
+                                  final err = await AuthService.instance.login(email: email, password: password);
+                                  if (err != null) {
+                                    messenger.showSnackBar(SnackBar(content: Text(err)));
+                                    return;
+                                  }
+                                  if (!context.mounted) return;
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                  );
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Unable to sign in. Please try again.')),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isLoading = false);
+                                  }
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF54309C),
+                          backgroundColor: AppColors.accentOrange,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: ['sans-serif'],
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontFamily: 'Be Vietnam Pro',
+                                  fontFamilyFallback: ['sans-serif'],
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -297,5 +335,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

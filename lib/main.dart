@@ -1,20 +1,25 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+
+import 'constants/app_colors.dart';
 import 'screens/login_screen.dart';
+import 'services/auth_service.dart';
 
-/// Excelerate + CareerMate AI brand colors.
-/// Purple is our primary UI color (matches existing screens).
-/// Orange is Excelerate's official brand color, used as an accent
-/// on the logo and key call-to-action moments.
-class AppColors {
-  static const Color primary = Color(0xFF54309C);
-  static const Color primaryAccent = Color(0xFF6C4AB6);
-  static const Color brandAccent = Color(0xFFFC603F); // Excelerate orange
-  static const Color background = Color(0xFFF5F5F7);
-  static const Color border = Color(0xFFE8E1F5);
-}
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
+  await AuthService.instance.init();
   runApp(const MyApp());
 }
 
@@ -27,23 +32,23 @@ class MyApp extends StatelessWidget {
       title: 'CareerMate AI',
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
         fontFamily: 'Be Vietnam Pro',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.primaryAccent,
-          tertiary: AppColors.brandAccent,
+          seedColor: AppColors.primaryPurple,
+          primary: AppColors.primaryPurple,
+          secondary: AppColors.primaryPurple,
+          tertiary: AppColors.accentOrange,
           surface: Colors.white,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.primaryPurple,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.primaryPurple,
             foregroundColor: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -53,7 +58,7 @@ class MyApp extends StatelessWidget {
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.primaryAccent,
+            foregroundColor: AppColors.primaryPurple,
           ),
         ),
       ),
