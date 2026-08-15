@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
-import 'signup_screen.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   static const Color primaryColor = Color(0xFF54309C);
   static const Color accentColor = Color(0xFF4A90E2);
   static const Color backgroundColor = Color(0xFFF5F5F7);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   TextStyle get _headlineStyle => const TextStyle(
         fontFamily: 'Be Vietnam Pro',
@@ -47,10 +48,37 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Color(0xFF1F1F28),
       );
 
+  InputDecoration _decoration({
+    required String hint,
+    required IconData icon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: _bodyStyle.copyWith(color: const Color(0xFF9A9AA6)),
+      prefixIcon: Icon(icon, color: SignUpScreen.primaryColor),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD8D8E3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: SignUpScreen.primaryColor,
+          width: 1.4,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LoginScreen.backgroundColor,
+      backgroundColor: SignUpScreen.backgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -98,90 +126,46 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'CareerMate AI',
+                      'Create Your Account',
                       textAlign: TextAlign.center,
                       style: _headlineStyle,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Your personal AI career mentor.',
+                      'Start your journey with CareerMate AI.',
                       textAlign: TextAlign.center,
                       style: _bodyStyle,
                     ),
                     const SizedBox(height: 28),
+                    Text('Full Name', style: _labelStyle),
+                    const SizedBox(height: 8),
+                    TextField(
+                      style: _fieldStyle,
+                      decoration: _decoration(
+                        hint: 'Enter your full name',
+                        icon: Icons.person_outline,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Text('Email Address', style: _labelStyle),
                     const SizedBox(height: 8),
                     TextField(
                       keyboardType: TextInputType.emailAddress,
                       style: _fieldStyle,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your email',
-                        hintStyle: _bodyStyle.copyWith(
-                          color: const Color(0xFF9A9AA6),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.mail_outline,
-                          color: LoginScreen.primaryColor,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD8D8E3),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: LoginScreen.primaryColor,
-                            width: 1.4,
-                          ),
-                        ),
+                      decoration: _decoration(
+                        hint: 'Enter your email',
+                        icon: Icons.mail_outline,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Text('Password', style: _labelStyle),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            foregroundColor: LoginScreen.accentColor,
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Forgot?',
-                            style: TextStyle(
-                              fontFamily: 'Be Vietnam Pro',
-                              fontFamilyFallback: ['sans-serif'],
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    Text('Password', style: _labelStyle),
                     const SizedBox(height: 8),
                     TextField(
                       obscureText: _obscurePassword,
                       style: _fieldStyle,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your password',
-                        hintStyle: _bodyStyle.copyWith(
-                          color: const Color(0xFF9A9AA6),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.lock_outline,
-                          color: LoginScreen.primaryColor,
-                        ),
+                      decoration: _decoration(
+                        hint: 'Create a password',
+                        icon: Icons.lock_outline,
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -195,23 +179,28 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: const Color(0xFF7D7D8A),
                           ),
                         ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD8D8E3),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: LoginScreen.primaryColor,
-                            width: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Confirm Password', style: _labelStyle),
+                    const SizedBox(height: 8),
+                    TextField(
+                      obscureText: _obscureConfirmPassword,
+                      style: _fieldStyle,
+                      decoration: _decoration(
+                        hint: 'Re-enter your password',
+                        icon: Icons.lock_outline,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: const Color(0xFF7D7D8A),
                           ),
                         ),
                       ),
@@ -222,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 54,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const HomeScreen(),
@@ -230,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF54309C),
+                          backgroundColor: SignUpScreen.primaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -238,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         child: const Text(
-                          'Login',
+                          'Create Account',
                           style: TextStyle(
                             fontFamily: 'Be Vietnam Pro',
                             fontFamilyFallback: ['sans-serif'],
@@ -255,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account? ",
+                            'Already have an account? ',
                             style: _bodyStyle.copyWith(
                               fontSize: 14,
                               color: const Color(0xFF5F5F6B),
@@ -263,10 +252,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const SignUpScreen(),
+                                  builder: (context) => const LoginScreen(),
                                 ),
                               );
                             },
@@ -274,10 +263,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: EdgeInsets.zero,
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              foregroundColor: LoginScreen.accentColor,
+                              foregroundColor: SignUpScreen.accentColor,
                             ),
                             child: const Text(
-                              'Sign Up',
+                              'Log In',
                               style: TextStyle(
                                 fontFamily: 'Be Vietnam Pro',
                                 fontFamilyFallback: ['sans-serif'],
