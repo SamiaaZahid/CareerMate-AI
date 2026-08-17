@@ -42,7 +42,7 @@ Students and Learners looking for guidance on career planning, resume building, 
 
 ## **Project Status**
 
-This project is currently in early development as part of a team internship project (Week 1: Setup & Planning phase).
+This project has progressed to Week 2, with a working UI prototype now built in Flutter, including functional Login, Home, Program Listing, and Program Details screens with working navigation between them.
 
 ## **Team**
 
@@ -50,10 +50,10 @@ Built collaboratively as part of the Mobile App Development with Flutter Virtual
 
 ## **Getting Started**
 
-```bash
+\`\`\`bash
 flutter pub get
 flutter run
-```
+\`\`\`
 
 ## **Navigation Flow**
 
@@ -63,4 +63,17 @@ flutter run
 * **Step 4:** Resume Analysis & Recommendations
 * **Step 5:** Skill Roadmap / AI Chat
 
+## **App Screenshots**
 
+Screenshots of the working prototype showing the four core screens and navigation flow.
+
+### Login Screen
+
+
+### Home / Dashboard
+
+
+### Program Listing
+
+
+### Program Details
