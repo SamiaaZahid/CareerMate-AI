@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -307,103 +308,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (ctx) {
-                                  final nameController = TextEditingController();
-                                  final emailController = TextEditingController(text: _emailController.text.trim());
-                                  final passwordController = TextEditingController();
-                                  final confirmController = TextEditingController();
-                                  bool submitting = false;
-                                  return StatefulBuilder(builder: (context, setStateSB) {
-                                    return Padding(
-                                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            const Text('Create account', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                                            const SizedBox(height: 12),
-                                            TextField(controller: nameController, decoration: const InputDecoration(hintText: 'Full name')),
-                                            const SizedBox(height: 8),
-                                            TextField(controller: emailController, decoration: const InputDecoration(hintText: 'Email')),
-                                            const SizedBox(height: 8),
-                                            TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(hintText: 'Password')),
-                                            const SizedBox(height: 8),
-                                            TextField(controller: confirmController, obscureText: true, decoration: const InputDecoration(hintText: 'Confirm password')),
-                                            const SizedBox(height: 12),
-                                            SizedBox(
-                                              height: 48,
-                                              child: ElevatedButton(
-                                                onPressed: submitting
-                                                    ? null
-                                                    : () async {
-                                                        final name = nameController.text.trim();
-                                                        final email = emailController.text.trim();
-                                                        final pwd = passwordController.text;
-                                                        final confirm = confirmController.text;
-                                                        final messenger = ScaffoldMessenger.of(context);
-                                                        if (name.isEmpty || email.isEmpty || pwd.isEmpty || confirm.isEmpty) {
-                                                          messenger.showSnackBar(const SnackBar(content: Text('Please fill all fields')));
-                                                          return;
-                                                        }
-                                                        if (!RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").hasMatch(email)) {
-                                                          messenger.showSnackBar(const SnackBar(content: Text('Invalid email')));
-                                                          return;
-                                                        }
-                                                        if (pwd.length < 6) {
-                                                          messenger.showSnackBar(const SnackBar(content: Text('Password must be at least 6 characters')));
-                                                          return;
-                                                        }
-                                                        if (pwd != confirm) {
-                                                          messenger.showSnackBar(const SnackBar(content: Text('Passwords do not match')));
-                                                          return;
-                                                        }
-                                                        setStateSB(() => submitting = true);
-                                                        try {
-                                                          final err = await AuthService.instance.signUp(name: name, email: email, password: pwd);
-                                                          if (err != null) {
-                                                            if (context.mounted) {
-                                                              setStateSB(() => submitting = false);
-                                                            }
-                                                            messenger.showSnackBar(SnackBar(content: Text(err)));
-                                                            return;
-                                                          }
-                                                          if (!context.mounted) return;
-                                                          if (context.mounted) {
-                                                            setStateSB(() => submitting = false);
-                                                          }
-                                                          Navigator.pop(ctx);
-                                                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-                                                        } catch (e, stackTrace) {
-                                                          debugPrint('Sign-up failed: $e');
-                                                          debugPrintStack(stackTrace: stackTrace);
-                                                          final errMessage = e.toString().replaceFirst('Exception: ', '');
-                                                          if (context.mounted) {
-                                                            ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                                                              SnackBar(content: Text('Sign up failed: $errMessage')),
-                                                            );
-                                                          }
-                                                        } finally {
-                                                          if (context.mounted) {
-                                                            setStateSB(() => submitting = false);
-                                                          }
-                                                        }
-                                                      },
-                                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.accentOrange),
-                                                child: submitting ? const CircularProgressIndicator(color: Colors.white) : const Text('Create account'),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                },
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignUpScreen(),
+                                ),
                               );
                             },
                             style: TextButton.styleFrom(

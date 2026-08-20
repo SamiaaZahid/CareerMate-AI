@@ -28,23 +28,22 @@ class AuthService {
   }
 
   Future<String?> signUp({required String name, required String email, required String password}) async {
-    final existing = await DbService.instance.getUserByEmail(email);
+    final cleanEmail = email.trim().toLowerCase();
+    final existing = await DbService.instance.getUserByEmail(cleanEmail);
     if (existing != null) return 'Account already exists';
     final hashed = _hashPassword(password);
     final id = await DbService.instance.createUser({
-      'name': name,
-      'email': email,
+      'name': name.trim(),
+      'email': cleanEmail,
       'password': hashed,
     });
     if (id == null) return 'Failed to create account';
-    _currentUserId = id;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('current_user_id', id);
     return null;
   }
 
   Future<String?> login({required String email, required String password}) async {
-    final user = await DbService.instance.getUserByEmail(email);
+    final cleanEmail = email.trim().toLowerCase();
+    final user = await DbService.instance.getUserByEmail(cleanEmail);
     if (user == null) return 'Invalid credentials';
     final hashed = _hashPassword(password);
     if (user['password'] != hashed) return 'Invalid credentials';

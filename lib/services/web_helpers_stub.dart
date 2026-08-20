@@ -1,0 +1,1 @@
+void openWebUrl(String url) {}
