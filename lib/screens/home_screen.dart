@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
 import 'profile_screen.dart';
+import 'program_listing_screen.dart';
 import 'resume_analysis_screen.dart';
 import 'settings_screen.dart';
 
@@ -244,9 +245,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Internships',
                     labelStyle: _cardTitleStyle,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Internships coming soon'),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProgramListingScreen(initialFilter: 'internships'),
                         ),
                       );
                     },

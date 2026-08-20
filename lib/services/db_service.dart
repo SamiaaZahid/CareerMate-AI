@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -51,6 +51,16 @@ class DbService {
             created_at INTEGER
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            email TEXT,
+            message TEXT,
+            created_at INTEGER
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -95,53 +105,65 @@ class DbService {
   }
 
   Future<int?> createUser(Map<String, dynamic> user) async {
+    final cleanUser = {
+      ...user,
+      if (user['email'] != null) 'email': user['email'].toString().trim().toLowerCase(),
+    };
+    int? insertedId;
     try {
       final database = await db;
-      return await database.insert('users', user);
+      insertedId = await database.insert('users', cleanUser);
+      debugPrint('[DbService] User inserted into SQLite DB with ID: $insertedId');
     } catch (e) {
-      if (kIsWeb) {
-        return await _createUserWebFallback(user);
-      }
-      return null;
+      debugPrint('[DbService] SQLite insert error (proceeding to web fallback): $e');
     }
+
+    final webId = await _createUserWebFallback(cleanUser);
+    debugPrint('[DbService] User saved to SharedPreferences fallback with ID: $webId');
+    return insertedId ?? webId;
   }
 
   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    final cleanEmail = email.trim().toLowerCase();
     try {
       final database = await db;
-      final rows = await database.query('users', where: 'email=?', whereArgs: [email]);
-      if (rows.isEmpty) return null;
-      return rows.first;
-    } catch (e) {
-      if (kIsWeb) {
-        return await _getUserByEmailWebFallback(email);
+      final rows = await database.query('users', where: 'LOWER(email)=?', whereArgs: [cleanEmail]);
+      if (rows.isNotEmpty) {
+        debugPrint('[DbService] User found in SQLite DB for email: $cleanEmail');
+        return rows.first;
       }
-      return null;
+    } catch (e) {
+      debugPrint('[DbService] SQLite query error: $e');
     }
+
+    final fallbackUser = await _getUserByEmailWebFallback(cleanEmail);
+    if (fallbackUser != null) {
+      debugPrint('[DbService] User found in SharedPreferences fallback for email: $cleanEmail');
+    } else {
+      debugPrint('[DbService] User NOT found for email: $cleanEmail');
+    }
+    return fallbackUser;
   }
 
   Future<Map<String, dynamic>?> getUserById(int id) async {
     try {
       final database = await db;
       final rows = await database.query('users', where: 'id=?', whereArgs: [id]);
-      if (rows.isEmpty) return null;
-      return rows.first;
+      if (rows.isNotEmpty) return rows.first;
     } catch (e) {
-      if (kIsWeb) {
-        return await _getUserByIdWebFallback(id);
-      }
-      return null;
+      debugPrint('[DbService] getUserById SQLite error: $e');
     }
+    return await _getUserByIdWebFallback(id);
   }
 
   Future<int> updateUserById(int id, Map<String, dynamic> values) async {
+    if (kIsWeb) {
+      return await _updateUserByIdWebFallback(id, values);
+    }
     try {
       final database = await db;
       return await database.update('users', values, where: 'id=?', whereArgs: [id]);
     } catch (e) {
-      if (kIsWeb) {
-        return await _updateUserByIdWebFallback(id, values);
-      }
       return 0;
     }
   }
@@ -192,14 +214,76 @@ class DbService {
     }
   }
 
+  Future<int> saveFeedback({
+    required String name,
+    required String email,
+    required String message,
+  }) async {
+    try {
+      final database = await db;
+      // Ensure feedback table exists even if upgraded from older schema version
+      await database.execute('''
+        CREATE TABLE IF NOT EXISTS feedback (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          email TEXT,
+          message TEXT,
+          created_at INTEGER
+        )
+      ''');
+      return await database.insert('feedback', {
+        'name': name,
+        'email': email,
+        'message': message,
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+      });
+    } catch (e) {
+      if (kIsWeb) {
+        return await _saveFeedbackWebFallback(name, email, message);
+      }
+      rethrow;
+    }
+  }
+
+  Future<int> _saveFeedbackWebFallback(String name, String email, String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList('careermate_feedback') ?? [];
+    final feedbacks = list.map((item) => jsonDecode(item) as Map<String, dynamic>).toList();
+    final nextId = feedbacks.isEmpty
+        ? 1
+        : feedbacks.map((item) => (item['id'] as int?) ?? 0).reduce((a, b) => a > b ? a : b) + 1;
+    feedbacks.add({
+      'id': nextId,
+      'name': name,
+      'email': email,
+      'message': message,
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    });
+    await prefs.setStringList(
+      'careermate_feedback',
+      feedbacks.map((item) => jsonEncode(item)).toList(),
+    );
+    return nextId;
+  }
+
   Future<int> _createUserWebFallback(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList('careermate_users') ?? [];
     final users = list.map((item) => jsonDecode(item) as Map<String, dynamic>).toList();
+    final cleanEmail = (user['email'] ?? '').toString().trim().toLowerCase();
+
+    for (int i = 0; i < users.length; i++) {
+      if ((users[i]['email'] ?? '').toString().trim().toLowerCase() == cleanEmail) {
+        users[i] = {...users[i], ...user, 'email': cleanEmail};
+        await prefs.setStringList('careermate_users', users.map((item) => jsonEncode(item)).toList());
+        return (users[i]['id'] as int?) ?? 1;
+      }
+    }
+
     final nextId = users.isEmpty
         ? 1
         : users.map((item) => (item['id'] as int?) ?? 0).reduce((a, b) => a > b ? a : b) + 1;
-    final newUser = {...user, 'id': nextId};
+    final newUser = {...user, 'email': cleanEmail, 'id': nextId};
     users.add(newUser);
     await prefs.setStringList(
       'careermate_users',
