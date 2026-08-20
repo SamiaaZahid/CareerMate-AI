@@ -179,15 +179,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               width: 6,
                             ),
                           ),
-                          child: Center(
-                            child: Container(
-                              width: 80,
-                              height: 80,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF7F3FF),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/images/excelerate_logo.png',
+                              width: 96,
+                              height: 96,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
                                 Icons.person_add_outlined,
                                 color: SignUpScreen.primaryColor,
                                 size: 34,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
+import 'constants/app_colors.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 
@@ -30,6 +31,38 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CareerMate AI',
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
+        fontFamily: 'Be Vietnam Pro',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primaryPurple,
+          primary: AppColors.primaryPurple,
+          secondary: AppColors.primaryPurple,
+          tertiary: AppColors.accentOrange,
+          surface: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.primaryPurple,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryPurple,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.primaryPurple,
+          ),
+        ),
+      ),
       home: const LoginScreen(),
     );
   }

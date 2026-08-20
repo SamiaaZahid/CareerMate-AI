@@ -91,19 +91,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             width: 6,
                           ),
                         ),
-                        child: Center(
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF7F3FF),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.image_outlined,
-                              color: LoginScreen.accentColor,
-                              size: 34,
-                            ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/excelerate_logo.png',
+                            width: 96,
+                            height: 96,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
