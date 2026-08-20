@@ -395,6 +395,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return;
                     }
                     await DbService.instance.updateUserById(userId, {'resume_path': file.path});
+                    setState(() {
+                      _resumePath = file.path;
+                    });
                     if (!context.mounted) return;
                     final messenger = ScaffoldMessenger.of(context);
                     final double snackLeft = MediaQuery.of(context).size.width * 0.5;
@@ -421,52 +424,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFD8F0DD)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          color: _successColor,
-                          size: 22,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'resume.pdf uploaded',
-                            style: TextStyle(
-                              fontFamily: 'Be Vietnam Pro',
-                              fontFamilyFallback: ['sans-serif'],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _successColor,
+              if (_resumePath != null && _resumePath!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFD8F0DD)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: _successColor,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${_resumePath!.split(RegExp(r"[/\\]")).last} uploaded',
+                              style: const TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontFamilyFallback: ['sans-serif'],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: _successColor,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        value: _resumePath != null ? 1 : 0,
-                        minHeight: 8,
-                        backgroundColor: const Color(0xFFE4F5E8),
-                        valueColor: AlwaysStoppedAnimation<Color>(_successColor),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: const LinearProgressIndicator(
+                          value: 1.0,
+                          minHeight: 8,
+                          backgroundColor: Color(0xFFE4F5E8),
+                          valueColor: AlwaysStoppedAnimation<Color>(_successColor),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
