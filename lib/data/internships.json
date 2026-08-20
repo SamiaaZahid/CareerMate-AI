@@ -1,0 +1,192 @@
+[
+  {
+    "type": "internship",
+    "title": "Software Engineering Intern",
+    "subtitle": "Google - Jun 2026 to Aug 2026",
+    "description": "Work alongside software engineers on production systems, contribute to code reviews, develop new features, and improve existing applications during a summer internship.",
+    "requirements": [
+      "Currently pursuing a degree in Computer Science or a related field",
+      "Comfortable with at least one OOP language such as Java, Python, or C++",
+      "Strong problem-solving and communication skills"
+    ],
+    "location": "Mountain View, CA (Hybrid)",
+    "deadline": "15 Sep 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Frontend Development Intern",
+    "subtitle": "Notion - Jul 2026 to Sep 2026",
+    "description": "Help build accessible and user-friendly interface components while working closely with design and product teams to improve the user experience.",
+    "requirements": [
+      "Experience with React or a similar component-based framework",
+      "Understanding of HTML, CSS, and JavaScript",
+      "Portfolio or GitHub with frontend projects"
+    ],
+    "location": "Remote",
+    "deadline": "20 Sep 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Mobile App Development Intern",
+    "subtitle": "Microsoft - Jun 2026 to Aug 2026",
+    "description": "Contribute to mobile application development, testing, debugging, and user-focused feature implementation as part of a software engineering team.",
+    "requirements": [
+      "Basic knowledge of Flutter, Dart, Kotlin, or Swift",
+      "Understanding of mobile application development concepts",
+      "Familiarity with Git and version control"
+    ],
+    "location": "Bangalore, India (Hybrid)",
+    "deadline": "25 Sep 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Data Analytics Intern",
+    "subtitle": "Deloitte - Jun 2026 to Aug 2026",
+    "description": "Assist teams with analysing datasets, creating reports, and developing data-driven insights to support business decisions.",
+    "requirements": [
+      "Basic knowledge of Python and SQL",
+      "Understanding of data analysis concepts",
+      "Strong analytical and communication skills"
+    ],
+    "location": "Hyderabad, India",
+    "deadline": "30 Sep 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Cloud Engineering Intern",
+    "subtitle": "Amazon Web Services - Jul 2026 to Sep 2026",
+    "description": "Learn and contribute to cloud infrastructure projects involving deployment, monitoring, automation, and cloud-based application development.",
+    "requirements": [
+      "Basic understanding of cloud computing concepts",
+      "Knowledge of Linux and networking fundamentals",
+      "Familiarity with Python or another programming language"
+    ],
+    "location": "Chennai, India (Hybrid)",
+    "deadline": "5 Oct 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Cybersecurity Intern",
+    "subtitle": "Cisco - Jun 2026 to Aug 2026",
+    "description": "Support cybersecurity teams with security monitoring, vulnerability assessment, documentation, and research into emerging security threats.",
+    "requirements": [
+      "Basic understanding of computer networks and cybersecurity",
+      "Familiarity with Linux systems",
+      "Interest in security analysis and threat detection"
+    ],
+    "location": "Bangalore, India",
+    "deadline": "10 Oct 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Business Process Intern",
+    "subtitle": "Accenture - Jul 2026 to Sep 2026",
+    "description": "Assist business teams in analysing workflows, documenting processes, identifying improvement opportunities, and supporting digital transformation initiatives.",
+    "requirements": [
+      "Strong analytical and problem-solving skills",
+      "Good written and verbal communication",
+      "Basic knowledge of business process mapping or project management"
+    ],
+    "location": "Pune, India (Hybrid)",
+    "deadline": "18 Oct 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Product Management Intern",
+    "subtitle": "Atlassian - Jun 2026 to Aug 2026",
+    "description": "Work with product managers, designers, and engineers to understand customer needs, analyse product feedback, and support feature planning.",
+    "requirements": [
+      "Strong communication and analytical skills",
+      "Interest in software products and technology",
+      "Ability to work collaboratively with cross-functional teams"
+    ],
+    "location": "Sydney, Australia (Hybrid)",
+    "deadline": "25 Oct 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "STEM Excellence Scholarship",
+    "subtitle": "$800 - Deadline: 30 Sep 2026",
+    "description": "Awarded to students demonstrating strong academic performance and active involvement in STEM projects, competitions, or research.",
+    "requirements": [
+      "Minimum GPA of 3.3 or equivalent",
+      "Currently enrolled in a STEM undergraduate program",
+      "One recommendation letter from a faculty member"
+    ],
+    "deadline": "30 Sep 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "Future Builders Grant",
+    "subtitle": "$600 - Deadline: 12 Oct 2026",
+    "description": "Supports students developing independent technical projects, innovative ideas, or early-stage startups alongside their studies.",
+    "requirements": [
+      "Submit a short project proposal or existing project link",
+      "Currently enrolled in an accredited institution",
+      "Open to students from all fields of study"
+    ],
+    "deadline": "12 Oct 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "Women in Technology Scholarship",
+    "subtitle": "$1,000 - Deadline: 20 Oct 2026",
+    "description": "Provides financial support to students pursuing technology-related degrees who demonstrate academic achievement and interest in building a career in technology.",
+    "requirements": [
+      "Currently pursuing a degree in Computer Science, IT, or a related field",
+      "Minimum GPA of 3.0 or equivalent",
+      "Submit a personal statement describing career goals"
+    ],
+    "deadline": "20 Oct 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "Global Technology Scholars Award",
+    "subtitle": "$2,000 - Deadline: 5 Nov 2026",
+    "description": "Provides financial assistance to students pursuing technology and engineering degrees who demonstrate academic achievement and a commitment to innovation.",
+    "requirements": [
+      "Enrolled in an undergraduate or postgraduate technology program",
+      "Academic transcript demonstrating strong performance",
+      "Personal statement describing an intended technology career"
+    ],
+    "location": "International",
+    "deadline": "5 Nov 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "Innovation Project Grant",
+    "subtitle": "$1,500 - Deadline: 15 Nov 2026",
+    "description": "Supports students developing innovative projects that use technology to address practical problems in education, sustainability, healthcare, or community development.",
+    "requirements": [
+      "Submit a project proposal",
+      "Describe the expected impact of the project",
+      "Currently enrolled at an accredited college or university"
+    ],
+    "deadline": "15 Nov 2026"
+  },
+  {
+    "type": "scholarship",
+    "title": "Academic Achievement Scholarship",
+    "subtitle": "$1,200 - Deadline: 30 Nov 2026",
+    "description": "Recognises students who have demonstrated consistent academic achievement and active participation in extracurricular or community activities.",
+    "requirements": [
+      "Minimum GPA of 3.5 or equivalent",
+      "Submit an academic transcript",
+      "Provide details of extracurricular or community involvement"
+    ],
+    "deadline": "30 Nov 2026"
+  },
+  {
+    "type": "internship",
+    "title": "Research Assistant Intern",
+    "subtitle": "MIT Research Lab - May 2026 to Aug 2026",
+    "description": "Assist researchers with literature reviews, data collection, experiments, analysis, and documentation as part of an academic research project.",
+    "requirements": [
+      "Currently enrolled in an undergraduate or postgraduate program",
+      "Strong research and analytical skills",
+      "Ability to read and understand technical documentation"
+    ],
+    "location": "Cambridge, MA (On-site)",
+    "deadline": "10 Dec 2026"
+  }
+]
