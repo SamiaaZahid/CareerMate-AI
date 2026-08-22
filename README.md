@@ -73,18 +73,30 @@ flutter run
 
 ## **App Screenshots**
 
-Screenshots of the working prototype showing the four core screens, navigation flow, and the new feedback form.
+Screenshots of the working prototype showing the four core screens and navigation flow.
 
 ### Login Screen
+
+<img width="568" height="909" alt="Screenshot 2026-08-17 004123" src="https://github.com/user-attachments/assets/a718b789-c94f-47e5-8b69-492dcf942b8a" />
+
+<img width="619" height="904" alt="Screenshot 2026-08-17 004133" src="https://github.com/user-attachments/assets/70582874-09f6-4414-8494-d54db81a3301" />
 
 
 ### Home / Dashboard
 
+<img width="609" height="937" alt="Screenshot 2026-08-17 003645" src="https://github.com/user-attachments/assets/56a78b57-283f-449b-8312-c27344654011" />
 
-### Program Listing (JSON-powered)
+
+### Program Listing
+
+<img width="619" height="911" alt="Screenshot 2026-08-17 003720" src="https://github.com/user-attachments/assets/93fbd0e6-38f8-449d-a07c-a4395db3e967" />
 
 
 ### Program Details
 
+<img width="572" height="932" alt="Screenshot 2026-08-17 003733" src="https://github.com/user-attachments/assets/ff5fd2e4-ff4a-4aa2-9e7c-abfb95d25f4f" />
 
 ### Feedback Form
+<img width="1366" height="768" alt="Screenshot (380)" src="https://github.com/user-attachments/assets/9fba5bda-f5f5-4df2-bcd9-805a989227e9" />
+
+
