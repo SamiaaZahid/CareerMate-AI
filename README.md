@@ -77,9 +77,9 @@ Screenshots of the working prototype showing the four core screens and navigatio
 
 ### Login Screen
 
-<img width="568" height="909" alt="Screenshot 2026-08-17 004123" src="https://github.com/user-attachments/assets/a718b789-c94f-47e5-8b69-492dcf942b8a" />
+<img width="1417" height="896" alt="1000317735" src="https://github.com/user-attachments/assets/db6fea93-ff2a-4d98-8814-c544c19bd301" />
 
-<img width="619" height="904" alt="Screenshot 2026-08-17 004133" src="https://github.com/user-attachments/assets/70582874-09f6-4414-8494-d54db81a3301" />
+<img width="1411" height="888" alt="1000317738" src="https://github.com/user-attachments/assets/fbfb7926-84ba-4047-8110-0b232904099f" />
 
 
 ### Home / Dashboard
@@ -89,14 +89,14 @@ Screenshots of the working prototype showing the four core screens and navigatio
 
 ### Program Listing
 
-<img width="619" height="911" alt="Screenshot 2026-08-17 003720" src="https://github.com/user-attachments/assets/93fbd0e6-38f8-449d-a07c-a4395db3e967" />
+<img width="1374" height="903" alt="1000317734" src="https://github.com/user-attachments/assets/030fafcb-a2bf-483b-8e74-3b9380efc951" />
 
 
 ### Program Details
 
-<img width="572" height="932" alt="Screenshot 2026-08-17 003733" src="https://github.com/user-attachments/assets/ff5fd2e4-ff4a-4aa2-9e7c-abfb95d25f4f" />
+<img width="1410" height="900" alt="1000317733" src="https://github.com/user-attachments/assets/0b5e8c40-43db-4a62-9c2a-795c93f42026" />
 
 ### Feedback Form
-<img width="1366" height="768" alt="Screenshot (380)" src="https://github.com/user-attachments/assets/9fba5bda-f5f5-4df2-bcd9-805a989227e9" />
+<img width="619" height="820" alt="1000317739" src="https://github.com/user-attachments/assets/75f57bda-576d-4b3c-a8ba-2dd0e2ccfc3b" />
 
 
