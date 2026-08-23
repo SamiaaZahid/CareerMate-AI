@@ -34,15 +34,23 @@ Students and Learners looking for guidance on career planning, resume building, 
 ## **Tech Stack**
 
 * **Frontend:** Flutter (Dart)
+* **Data:** JSON (local sample data for internships/scholarships)
 * **Version Control:** Git & GitHub
 
 ## **Future Scope**
 
 * **Admin Panel** – A backend interface to manage and update internship listings, scholarship data, and monitor platform usage. Since internship/scholarship recommendations rely on underlying data, an admin panel will be required in a later phase to keep this data current without hardcoding it into the app.
+* **Live AI Integration** – Connecting the AI Resume Analysis and AI Career Chat features to a real AI API.
 
 ## **Project Status**
 
-This project has progressed to Week 2, with a working UI prototype now built in Flutter, including functional Login, Home, Program Listing, and Program Details screens with working navigation between them.
+This project has progressed to Week 3. The app now pulls internship and scholarship data from a local JSON file instead of hardcoded text, and includes a working feedback form with input validation.
+
+## **What's New This Week (Week 3)**
+
+* **JSON Data Integration** – Program Listing and Program Details screens now fetch data from a local JSON file (`lib/data/internships.json`) instead of hardcoded lists.
+* **Feedback Form** – Added a working feedback form with input validation (empty field checks, email format validation).
+* **Loading State** – Added a loading indicator while JSON data is being fetched, for a smoother user experience.
 
 ## **Team**
 
@@ -60,7 +68,7 @@ flutter run
 * **Step 1:** Login/Signup
 * **Step 2:** Home (Dashboard)
 * **Step 3:** Profile (with CV Upload)
-* **Step 4:** Resume Analysis & Recommendations
+* **Step 4:** Resume Analysis & Recommendations (now JSON-powered)
 * **Step 5:** Skill Roadmap / AI Chat
 
 ## **App Screenshots**
@@ -87,3 +95,8 @@ Screenshots of the working prototype showing the four core screens and navigatio
 ### Program Details
 
 <img width="572" height="932" alt="Screenshot 2026-08-17 003733" src="https://github.com/user-attachments/assets/ff5fd2e4-ff4a-4aa2-9e7c-abfb95d25f4f" />
+
+### Feedback Form
+<img width="1366" height="768" alt="Screenshot (380)" src="https://github.com/user-attachments/assets/9fba5bda-f5f5-4df2-bcd9-805a989227e9" />
+
+
