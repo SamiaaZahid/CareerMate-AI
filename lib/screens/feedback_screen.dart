@@ -22,12 +22,12 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController _messageController = TextEditingController();
   bool _isSubmitting = false;
 
-  TextStyle get _headlineStyle => const TextStyle(
+  TextStyle get _headlineStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontWeight: FontWeight.bold,
         fontSize: 24,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   TextStyle get _bodyStyle => const TextStyle(
@@ -37,40 +37,42 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         color: Color(0xFF6F6F7B),
       );
 
-  TextStyle get _labelStyle => const TextStyle(
+  TextStyle get _labelStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
-  TextStyle get _fieldStyle => const TextStyle(
+  TextStyle get _fieldStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 15,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   InputDecoration _decoration({
     required String hint,
     required IconData icon,
+    required Color primaryColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hint,
       hintStyle: _bodyStyle.copyWith(color: const Color(0xFF9A9AA6)),
-      prefixIcon: Icon(icon, color: FeedbackScreen.primaryColor),
+      prefixIcon: Icon(icon, color: primaryColor),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Theme.of(context).cardColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD8D8E3)),
+        borderSide: BorderSide(color: isDark ? const Color(0xFF2C2C35) : const Color(0xFFD8D8E3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: FeedbackScreen.primaryColor,
+        borderSide: BorderSide(
+          color: primaryColor,
           width: 1.4,
         ),
       ),
@@ -138,10 +140,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFF9D7BEE) : FeedbackScreen.primaryColor;
+    final cardBorder = isDark ? const Color(0xFF2C2C35) : FeedbackScreen.borderColor;
+
     return Scaffold(
-      backgroundColor: FeedbackScreen.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: FeedbackScreen.primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : FeedbackScreen.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -162,9 +168,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: FeedbackScreen.borderColor),
+                  border: Border.all(color: cardBorder),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x0F000000),
@@ -196,6 +202,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         decoration: _decoration(
                           hint: 'Enter your full name',
                           icon: Icons.person_outline,
+                          primaryColor: primaryColor,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -214,6 +221,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         decoration: _decoration(
                           hint: 'Enter your email address',
                           icon: Icons.mail_outline,
+                          primaryColor: primaryColor,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -236,6 +244,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         decoration: _decoration(
                           hint: 'Write your feedback here (min 10 characters)...',
                           icon: Icons.chat_bubble_outline,
+                          primaryColor: primaryColor,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {

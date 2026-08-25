@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 import 'feedback_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
@@ -27,12 +28,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _loading = true;
   bool _notificationsEnabled = true;
 
-  TextStyle get _sectionStyle => const TextStyle(
+  TextStyle get _sectionStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   TextStyle get _labelStyle => const TextStyle(
@@ -43,12 +44,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: Color(0xFF8B8B98),
       );
 
-  TextStyle get _valueStyle => const TextStyle(
+  TextStyle get _valueStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   @override
@@ -109,10 +110,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFFA582F7) : SettingsScreen.primaryColor;
+    final cardBg = Theme.of(context).cardColor;
+    final iconBg = isDark ? const Color(0xFF2C2640) : const Color(0xFFF2EDFC);
+    final cardBorder = isDark ? const Color(0xFF2E2E3E) : SettingsScreen.borderColor;
+    final dividerColor = isDark ? const Color(0xFF2C2C3A) : const Color(0xFFF0ECF8);
+
     return Scaffold(
-      backgroundColor: SettingsScreen.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: SettingsScreen.primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : SettingsScreen.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -136,9 +144,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardBg,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: SettingsScreen.borderColor),
+                        border: Border.all(color: cardBorder),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x0F000000),
@@ -155,12 +163,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2EDFC),
+                                color: iconBg,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.person_outline,
-                                color: SettingsScreen.primaryColor,
+                                color: primaryColor,
                               ),
                             ),
                             title: Text(
@@ -181,27 +189,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                           ),
-                          const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0ECF8)),
+                          Divider(height: 1, indent: 16, endIndent: 16, color: dividerColor),
                           ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             leading: Container(
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2EDFC),
+                                color: iconBg,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.edit_note_rounded,
-                                color: SettingsScreen.primaryColor,
+                                color: primaryColor,
                               ),
                             ),
-                            title: const Text('Edit Profile', style: TextStyle(
-                              fontFamily: 'Be Vietnam Pro',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1F1F28),
-                            )),
+                            title: Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
                             trailing: const Icon(Icons.chevron_right, color: SettingsScreen.inactiveColor),
                             onTap: () {
                               Navigator.push(
@@ -220,9 +231,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardBg,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: SettingsScreen.borderColor),
+                        border: Border.all(color: cardBorder),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x0F000000),
@@ -239,53 +250,84 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2EDFC),
+                                color: iconBg,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
-                                Icons.notifications_none_rounded,
-                                color: SettingsScreen.primaryColor,
+                              child: Icon(
+                                Icons.dark_mode_outlined,
+                                color: primaryColor,
                               ),
                             ),
-                            title: const Text(
+                            title: Text(
+                              'Dark Mode',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            value: ThemeService.instance.isDarkMode,
+                            activeTrackColor: primaryColor,
+                            onChanged: (val) {
+                              ThemeService.instance.setDarkMode(val);
+                              setState(() {});
+                            },
+                          ),
+                          Divider(height: 1, indent: 16, endIndent: 16, color: dividerColor),
+                          SwitchListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            secondary: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: iconBg,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.notifications_none_rounded,
+                                color: primaryColor,
+                              ),
+                            ),
+                            title: Text(
                               'Push Notifications',
                               style: TextStyle(
                                 fontFamily: 'Be Vietnam Pro',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F1F28),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             value: _notificationsEnabled,
-                            activeColor: SettingsScreen.primaryColor,
+                            activeTrackColor: primaryColor,
                             onChanged: (val) {
                               setState(() {
                                 _notificationsEnabled = val;
                               });
                             },
                           ),
-                          const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0ECF8)),
+                          Divider(height: 1, indent: 16, endIndent: 16, color: dividerColor),
                           ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             leading: Container(
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2EDFC),
+                                color: iconBg,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.feedback_outlined,
-                                color: SettingsScreen.primaryColor,
+                                color: primaryColor,
                               ),
                             ),
-                            title: const Text(
+                            title: Text(
                               'Send Feedback',
                               style: TextStyle(
                                 fontFamily: 'Be Vietnam Pro',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F1F28),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             subtitle: const Text(
@@ -315,9 +357,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardBg,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: SettingsScreen.borderColor),
+                        border: Border.all(color: cardBorder),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x0F000000),
@@ -334,30 +376,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 width: 42,
                                 height: 42,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF2EDFC),
+                                  color: iconBg,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.info_outline_rounded,
-                                  color: SettingsScreen.primaryColor,
+                                  color: primaryColor,
                                 ),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
+                                  children: [
                                     Text(
                                       'CareerMate AI',
                                       style: TextStyle(
                                         fontFamily: 'Be Vietnam Pro',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1F1F28),
+                                        color: Theme.of(context).colorScheme.onSurface,
                                       ),
                                     ),
-                                    SizedBox(height: 2),
-                                    Text(
+                                    const SizedBox(height: 2),
+                                    const Text(
                                       'Version 1.0.0 (Build 1)',
                                       style: TextStyle(
                                         fontFamily: 'Be Vietnam Pro',
@@ -406,8 +448,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: SettingsScreen.primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: primaryColor,
         unselectedItemColor: SettingsScreen.inactiveColor,
         selectedLabelStyle: const TextStyle(
           fontFamily: 'Be Vietnam Pro',

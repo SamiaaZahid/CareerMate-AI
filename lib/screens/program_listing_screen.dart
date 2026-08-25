@@ -117,10 +117,16 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFFA582F7) : ProgramListingScreen.primaryColor;
+    final cardBg = Theme.of(context).cardColor;
+    final searchBg = isDark ? const Color(0xFF282836) : const Color(0xFFF7F6FC);
+    final cardBorder = isDark ? const Color(0xFF2E2E3E) : ProgramListingScreen.borderColor;
+
     return Scaffold(
-      backgroundColor: ProgramListingScreen.backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: ProgramListingScreen.primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : ProgramListingScreen.primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -137,11 +143,15 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              color: Colors.white,
+              color: cardBg,
               child: Column(
                 children: [
                   TextField(
                     controller: _searchController,
+                    style: TextStyle(
+                      fontFamily: 'Be Vietnam Pro',
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     onChanged: (val) {
                       setState(() {
                         _searchQuery = val;
@@ -167,16 +177,16 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
                             )
                           : null,
                       filled: true,
-                      fillColor: const Color(0xFFF7F6FC),
+                      fillColor: searchBg,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE8E1F5)),
+                        borderSide: BorderSide(color: cardBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: ProgramListingScreen.primaryColor,
+                        borderSide: BorderSide(
+                          color: primaryColor,
                           width: 1.4,
                         ),
                       ),
@@ -189,18 +199,24 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
                         label: 'All',
                         isSelected: _selectedFilter == 'all',
                         onTap: () => setState(() => _selectedFilter = 'all'),
+                        primaryColor: primaryColor,
+                        cardBorder: cardBorder,
                       ),
                       const SizedBox(width: 8),
                       _FilterChip(
                         label: 'Internships',
                         isSelected: _selectedFilter == 'internships',
                         onTap: () => setState(() => _selectedFilter = 'internships'),
+                        primaryColor: primaryColor,
+                        cardBorder: cardBorder,
                       ),
                       const SizedBox(width: 8),
                       _FilterChip(
                         label: 'Scholarships',
                         isSelected: _selectedFilter == 'scholarships',
                         onTap: () => setState(() => _selectedFilter = 'scholarships'),
+                        primaryColor: primaryColor,
+                        cardBorder: cardBorder,
                       ),
                     ],
                   ),
@@ -212,20 +228,20 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.search_off_rounded, size: 48, color: Color(0xFF8B8B98)),
-                          SizedBox(height: 12),
+                        children: [
+                          const Icon(Icons.search_off_rounded, size: 48, color: Color(0xFF8B8B98)),
+                          const SizedBox(height: 12),
                           Text(
                             'No opportunities found',
                             style: TextStyle(
                               fontFamily: 'Be Vietnam Pro',
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F1F28),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
+                          const SizedBox(height: 4),
+                          const Text(
                             'Try adjusting your search query or filters',
                             style: TextStyle(
                               fontFamily: 'Be Vietnam Pro',
@@ -241,7 +257,12 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
                       itemCount: _filteredPrograms.length,
                       itemBuilder: (context, index) {
                         final item = _filteredPrograms[index];
-                        return _ProgramCard(item: item);
+                        return _ProgramCard(
+                          item: item,
+                          primaryColor: primaryColor,
+                          cardBg: cardBg,
+                          cardBorder: cardBorder,
+                        );
                       },
                     ),
             ),
@@ -263,24 +284,31 @@ class _FilterChip extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    required this.primaryColor,
+    required this.cardBorder,
   });
 
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final Color primaryColor;
+  final Color cardBorder;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final unselectedBg = isDark ? const Color(0xFF2C2640) : const Color(0xFFF2EDFC);
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryPurple : const Color(0xFFF2EDFC),
+          color: isSelected ? primaryColor : unselectedBg,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isSelected ? AppColors.primaryPurple : const Color(0xFFE8E1F5),
+            color: isSelected ? primaryColor : cardBorder,
           ),
         ),
         child: Text(
@@ -289,7 +317,7 @@ class _FilterChip extends StatelessWidget {
             fontFamily: 'Be Vietnam Pro',
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.white : AppColors.primaryPurple,
+            color: isSelected ? Colors.white : primaryColor,
           ),
         ),
       ),
@@ -298,21 +326,31 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ProgramCard extends StatelessWidget {
-  const _ProgramCard({required this.item});
+  const _ProgramCard({
+    required this.item,
+    required this.primaryColor,
+    required this.cardBg,
+    required this.cardBorder,
+  });
 
   final RecommendationItemData item;
+  final Color primaryColor;
+  final Color cardBg;
+  final Color cardBorder;
 
   @override
   Widget build(BuildContext context) {
     final bool isInternship = item.type == RecommendationType.internship;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final badgeBg = isDark ? const Color(0xFF2C2640) : const Color(0xFFF2EDFC);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: ProgramListingScreen.borderColor),
+        border: Border.all(color: cardBorder),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F000000),
@@ -329,7 +367,7 @@ class _ProgramCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2EDFC),
+                  color: badgeBg,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Row(
@@ -338,16 +376,16 @@ class _ProgramCard extends StatelessWidget {
                     Icon(
                       isInternship ? Icons.work_outline : Icons.school_outlined,
                       size: 14,
-                      color: ProgramListingScreen.primaryColor,
+                      color: primaryColor,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       isInternship ? 'Internship' : 'Scholarship',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: ProgramListingScreen.primaryColor,
+                        color: primaryColor,
                       ),
                     ),
                   ],
@@ -374,11 +412,11 @@ class _ProgramCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             item.title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Be Vietnam Pro',
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F1F28),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -396,11 +434,11 @@ class _ProgramCard extends StatelessWidget {
             item.description,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Be Vietnam Pro',
               fontSize: 13,
               height: 1.4,
-              color: Color(0xFF5F5F6B),
+              color: isDark ? const Color(0xFFA0A0B2) : const Color(0xFF5F5F6B),
             ),
           ),
           const SizedBox(height: 16),
