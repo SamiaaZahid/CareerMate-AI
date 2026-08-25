@@ -2,26 +2,18 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../models/recommendation_item.dart';
-import '../services/db_service.dart';
-import '../services/auth_service.dart';
 import '../constants/app_colors.dart';
+import '../models/recommendation_item.dart';
+import '../services/auth_service.dart';
+import '../services/db_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'program_details_screen.dart';
 import 'settings_screen.dart';
 
-const Color kAnalysisBackgroundColor = Color(0xFFF5F5F7);
 const Color kAnalysisPrimaryColor = AppColors.primaryPurple;
 const Color kAnalysisBorderColor = Color(0xFFE8E1F5);
 const Color kAnalysisInactiveColor = Color(0xFF8B8B98);
-const TextStyle kAnalysisCardTitleStyle = TextStyle(
-  fontFamily: 'Be Vietnam Pro',
-  fontFamilyFallback: ['sans-serif'],
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF1F1F28),
-);
 
 class ResumeAnalysisScreen extends StatefulWidget {
   const ResumeAnalysisScreen({super.key});
@@ -39,7 +31,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
     'CI/CD Pipelines',
   ];
 
-final List<RecommendationItemData> _internships = const [
+  final List<RecommendationItemData> _internships = const [
     RecommendationItemData(
       type: RecommendationType.internship,
       title: 'Software Engineering Intern',
@@ -112,11 +104,34 @@ final List<RecommendationItemData> _internships = const [
       );
 
   @override
+  void initState() {
+    super.initState();
+    _logAnalysisDiagnostics();
+  }
+
+  Future<void> _logAnalysisDiagnostics() async {
+    final userId = AuthService.instance.currentUserId;
+    String? resumePath;
+    if (userId != null) {
+      final user = await DbService.instance.getUserById(userId);
+      resumePath = user?['resume_path'] as String?;
+    }
+    debugPrint('[ResumeAnalysisScreen] Active userId: $userId');
+    debugPrint('[ResumeAnalysisScreen] User resume_path from DB: $resumePath');
+    debugPrint('[ResumeAnalysisScreen] API call triggered: FALSE (currently using static mock data)');
+    debugPrint('[ResumeAnalysisScreen] Displaying static score: 78/100, missing skills: $_missingSkills');
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFF9D7BEE) : kAnalysisPrimaryColor;
+    final cardBorder = isDark ? const Color(0xFF2C2C35) : kAnalysisBorderColor;
+
     return Scaffold(
-      backgroundColor: kAnalysisBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kAnalysisPrimaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : kAnalysisPrimaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -134,15 +149,15 @@ final List<RecommendationItemData> _internships = const [
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Center(
+              Center(
                 child: Text(
                   'Resume Analysis',
                   style: TextStyle(
                     fontFamily: 'Be Vietnam Pro',
-                    fontFamilyFallback: ['sans-serif'],
+                    fontFamilyFallback: const ['sans-serif'],
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: kAnalysisPrimaryColor,
+                    color: primaryColor,
                   ),
                 ),
               ),
@@ -150,7 +165,7 @@ final List<RecommendationItemData> _internships = const [
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 360),
-                    child: Column(
+                  child: Column(
                     children: [
                       Text(
                         'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
@@ -159,14 +174,26 @@ final List<RecommendationItemData> _internships = const [
                       ),
                       const SizedBox(height: 12),
                       TextField(
+                        style: TextStyle(
+                          fontFamily: 'Be Vietnam Pro',
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Search jobs or keywords',
+                          hintStyle: const TextStyle(
+                            fontFamily: 'Be Vietnam Pro',
+                            color: Color(0xFF9A9AA6),
+                          ),
                           prefixIcon: const Icon(Icons.search, color: AppColors.accentOrange),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: Theme.of(context).cardColor,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                            borderSide: BorderSide(color: cardBorder),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: cardBorder),
                           ),
                         ),
                         onSubmitted: (q) async {
@@ -184,7 +211,7 @@ final List<RecommendationItemData> _internships = const [
                             SnackBar(
                               behavior: SnackBarBehavior.floating,
                               margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                              backgroundColor: kAnalysisPrimaryColor,
+                              backgroundColor: primaryColor,
                               content: Text('Saved search: $q', style: const TextStyle(color: Colors.white)),
                             ),
                           );
@@ -195,10 +222,11 @@ final List<RecommendationItemData> _internships = const [
                 ),
               ),
               const SizedBox(height: 24),
-              const Center(
+              Center(
                 child: _ScoreRing(
                   scoreText: '78 / 100',
                   progress: 0.78,
+                  primaryColor: primaryColor,
                 ),
               ),
               const SizedBox(height: 12),
@@ -209,45 +237,55 @@ final List<RecommendationItemData> _internships = const [
                 ),
               ),
               const SizedBox(height: 24),
-              const _BulletCard(
+              _BulletCard(
                 title: 'Strengths',
                 icon: Icons.check_circle_rounded,
-                iconColor: Color(0xFF2FA84F),
-                bullets: [
+                iconColor: const Color(0xFF2FA84F),
+                bullets: const [
                   'Strong project section with clear outcomes',
                   'Relevant technical keywords already included',
                   'Good structure and readable formatting',
                 ],
                 bulletIcon: Icons.star_rounded,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 16),
-              const _BulletCard(
+              _BulletCard(
                 title: 'Areas for Improvement',
                 icon: Icons.warning_amber_rounded,
-                iconColor: Color(0xFFE08A1E),
-                bullets: [
+                iconColor: const Color(0xFFE08A1E),
+                bullets: const [
                   'Add more measurable achievements and metrics',
                   'Highlight cloud and deployment experience',
                   'Include collaboration and leadership examples',
                 ],
                 bulletIcon: Icons.arrow_right_alt_rounded,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 16),
               _SkillsSection(
                 title: 'Missing Skills Detected',
                 chips: _missingSkills,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 16),
               _RecommendationSection(
                 title: 'Recommended Internships',
                 icon: Icons.work_outline,
                 items: _internships,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 16),
               _RecommendationSection(
                 title: 'Recommended Scholarships',
                 icon: Icons.school_outlined,
                 items: _scholarships,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
               ),
             ],
           ),
@@ -256,8 +294,8 @@ final List<RecommendationItemData> _internships = const [
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: kAnalysisPrimaryColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: primaryColor,
         unselectedItemColor: kAnalysisInactiveColor,
         selectedLabelStyle: const TextStyle(
           fontFamily: 'Be Vietnam Pro',
@@ -324,13 +362,19 @@ final List<RecommendationItemData> _internships = const [
 }
 
 class _ScoreRing extends StatelessWidget {
-  const _ScoreRing({required this.scoreText, required this.progress});
+  const _ScoreRing({
+    required this.scoreText,
+    required this.progress,
+    required this.primaryColor,
+  });
 
   final String scoreText;
   final double progress;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: 210,
       height: 210,
@@ -341,8 +385,8 @@ class _ScoreRing extends StatelessWidget {
             child: CustomPaint(
               painter: _RingPainter(
                 progress: progress,
-                backgroundColor: const Color(0xFFE8E1F6),
-                progressColor: kAnalysisPrimaryColor,
+                backgroundColor: isDark ? const Color(0xFF2C2C35) : const Color(0xFFE8E1F6),
+                progressColor: primaryColor,
               ),
             ),
           ),
@@ -350,7 +394,7 @@ class _ScoreRing extends StatelessWidget {
             width: 140,
             height: 140,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               boxShadow: const [
                 BoxShadow(
@@ -363,12 +407,12 @@ class _ScoreRing extends StatelessWidget {
             child: Center(
               child: Text(
                 scoreText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Be Vietnam Pro',
-                  fontFamilyFallback: ['sans-serif'],
+                  fontFamilyFallback: const ['sans-serif'],
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: kAnalysisPrimaryColor,
+                  color: primaryColor,
                 ),
               ),
             ),
@@ -427,6 +471,8 @@ class _BulletCard extends StatelessWidget {
     required this.iconColor,
     required this.bullets,
     required this.bulletIcon,
+    required this.borderColor,
+    required this.primaryColor,
   });
 
   final String title;
@@ -434,15 +480,17 @@ class _BulletCard extends StatelessWidget {
   final Color iconColor;
   final List<String> bullets;
   final IconData bulletIcon;
+  final Color borderColor;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -458,7 +506,18 @@ class _BulletCard extends StatelessWidget {
             children: [
               Icon(icon, color: iconColor, size: 22),
               const SizedBox(width: 8),
-              Expanded(child: Text(title, style: kAnalysisCardTitleStyle)),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Be Vietnam Pro',
+                    fontFamilyFallback: const ['sans-serif'],
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -471,17 +530,17 @@ class _BulletCard extends StatelessWidget {
                   Icon(
                     bulletIcon,
                     size: 18,
-                    color: kAnalysisPrimaryColor,
+                    color: primaryColor,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       bullet,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 14,
-                        color: Color(0xFF5F5F6B),
+                        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFFB0B0C0) : const Color(0xFF5F5F6B),
                       ),
                     ),
                   ),
@@ -496,19 +555,29 @@ class _BulletCard extends StatelessWidget {
 }
 
 class _SkillsSection extends StatelessWidget {
-  const _SkillsSection({required this.title, required this.chips});
+  const _SkillsSection({
+    required this.title,
+    required this.chips,
+    required this.borderColor,
+    required this.primaryColor,
+  });
 
   final String title;
   final List<String> chips;
+  final Color borderColor;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconBg = isDark ? const Color(0xFF2C2540) : const Color(0xFFF2EDFC);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -520,7 +589,16 @@ class _SkillsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: kAnalysisCardTitleStyle),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: const ['sans-serif'],
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -533,18 +611,18 @@ class _SkillsSection extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2EDFC),
+                      color: iconBg,
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: kAnalysisBorderColor),
+                      border: Border.all(color: borderColor),
                     ),
                     child: Text(
                       chip,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: kAnalysisPrimaryColor,
+                        color: primaryColor,
                       ),
                     ),
                   ),
@@ -562,20 +640,28 @@ class _RecommendationSection extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.items,
+    required this.borderColor,
+    required this.primaryColor,
   });
 
   final String title;
   final IconData icon;
   final List<RecommendationItemData> items;
+  final Color borderColor;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final subCardBg = isDark ? const Color(0xFF262630) : const Color(0xFFFDFDFF);
+    final subCardBorder = isDark ? const Color(0xFF333340) : const Color(0xFFE9E4F7);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -589,9 +675,18 @@ class _RecommendationSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: kAnalysisPrimaryColor, size: 22),
+              Icon(icon, color: primaryColor, size: 22),
               const SizedBox(width: 8),
-              Text(title, style: kAnalysisCardTitleStyle),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontFamilyFallback: const ['sans-serif'],
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -601,21 +696,21 @@ class _RecommendationSection extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDFDFF),
+                  color: subCardBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE9E4F7)),
+                  border: Border.all(color: subCardBorder),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       item.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F1F28),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),

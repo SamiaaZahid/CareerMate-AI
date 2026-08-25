@@ -157,15 +157,22 @@ class DbService {
   }
 
   Future<int> updateUserById(int id, Map<String, dynamic> values) async {
-    if (kIsWeb) {
-      return await _updateUserByIdWebFallback(id, values);
-    }
+    int updatedCount = 0;
     try {
       final database = await db;
-      return await database.update('users', values, where: 'id=?', whereArgs: [id]);
+      updatedCount = await database.update('users', values, where: 'id=?', whereArgs: [id]);
+      debugPrint('[DbService] updateUserById SQLite updated $updatedCount row(s) for user ID $id');
     } catch (e) {
-      return 0;
+      debugPrint('[DbService] updateUserById SQLite error: $e');
     }
+
+    if (kIsWeb) {
+      final fallbackCount = await _updateUserByIdWebFallback(id, values);
+      debugPrint('[DbService] updateUserById web fallback updated $fallbackCount row(s)');
+      return updatedCount > 0 ? updatedCount : fallbackCount;
+    }
+
+    return updatedCount;
   }
 
   Future<bool> userExists(String email, String password) async {

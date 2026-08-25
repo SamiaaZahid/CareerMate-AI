@@ -18,67 +18,83 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? _profileName;
+  bool _hasCvUploaded = false;
+  String? _cvFileName;
 
-  static const Color _backgroundColor = Color(0xFFF5F5F7);
   static const Color _primaryColor = Color(0xFF54309C);
   static const Color _borderColor = Color(0xFFE8E1F5);
   static const Color _inactiveColor = Color(0xFF8B8B98);
 
-  TextStyle get _headlineStyle => const TextStyle(
+  TextStyle get _headlineStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 28,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
-  TextStyle get _sectionStyle => const TextStyle(
+  TextStyle get _sectionStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
-  TextStyle get _cardTitleStyle => const TextStyle(
+  TextStyle get _cardTitleStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   @override
   void initState() {
     super.initState();
-    _loadProfileName();
+    _loadUserData();
   }
 
-  Future<void> _loadProfileName() async {
+  Future<void> _loadUserData() async {
     final userId = AuthService.instance.currentUserId;
     if (userId == null) {
       if (mounted) {
-        setState(() => _profileName = null);
+        setState(() {
+          _profileName = null;
+          _hasCvUploaded = false;
+          _cvFileName = null;
+        });
       }
       return;
     }
 
     final user = await DbService.instance.getUserById(userId);
     final name = (user?['name'] as String?)?.trim();
+    final resumePath = (user?['resume_path'] as String?)?.trim();
+    final hasCv = resumePath != null && resumePath.isNotEmpty;
+    final fileName = hasCv ? resumePath.split(RegExp(r'[/\\]')).last : null;
 
+    debugPrint('[HomeScreen] _loadUserData -> userId: $userId, resume_path: $resumePath, hasCv: $hasCv');
     if (mounted) {
       setState(() {
         _profileName = name?.isNotEmpty == true ? name : null;
+        _hasCvUploaded = hasCv;
+        _cvFileName = fileName;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFFA582F7) : _primaryColor;
+    final iconBgColor = isDark ? const Color(0xFF2C2640) : const Color(0xFFF2EDFC);
+    final cardBorderColor = isDark ? const Color(0xFF2E2E3E) : _borderColor;
+
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: _primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : _primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -141,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _StatusCard(
                 title: 'Profile Completeness',
                 titleStyle: _sectionStyle,
-                borderColor: _borderColor,
+                borderColor: cardBorderColor,
                 content: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -149,18 +165,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 58,
                       height: 58,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2EDFC),
+                        color: iconBgColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          '60%',
+                          _hasCvUploaded ? '80%' : '50%',
                           style: TextStyle(
                             fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: ['sans-serif'],
+                            fontFamilyFallback: const ['sans-serif'],
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: _primaryColor,
+                            color: primaryColor,
                           ),
                         ),
                       ),
@@ -170,24 +186,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Almost there',
+                          Text(
+                            _hasCvUploaded ? 'Great progress!' : 'Almost there',
                             style: TextStyle(
                               fontFamily: 'Be Vietnam Pro',
-                              fontFamilyFallback: ['sans-serif'],
+                              fontFamilyFallback: const ['sans-serif'],
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF4C4C58),
+                              color: isDark ? const Color(0xFFA0A0B2) : const Color(0xFF4C4C58),
                             ),
                           ),
                           const SizedBox(height: 8),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(999),
-                            child: const LinearProgressIndicator(
-                              value: 0.6,
+                            child: LinearProgressIndicator(
+                              value: _hasCvUploaded ? 0.8 : 0.5,
                               minHeight: 8,
-                              backgroundColor: Color(0xFFEDEAF7),
-                              valueColor: AlwaysStoppedAnimation<Color>(
+                              backgroundColor: isDark ? const Color(0xFF2C2C3A) : const Color(0xFFEDEAF7),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
                                 Color(0xFF4A90E2),
                               ),
                             ),
@@ -202,27 +218,51 @@ class _HomeScreenState extends State<HomeScreen> {
               _StatusCard(
                 title: 'CV Status',
                 titleStyle: _sectionStyle,
-                borderColor: _borderColor,
+                borderColor: cardBorderColor,
                 content: Row(
-                  children: const [
+                  children: [
                     Icon(
-                      Icons.check_circle_rounded,
-                      color: Color(0xFF2FA84F),
+                      _hasCvUploaded ? Icons.check_circle_rounded : Icons.warning_amber_rounded,
+                      color: _hasCvUploaded ? const Color(0xFF2FA84F) : AppColors.accentOrange,
                       size: 24,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'CV uploaded successfully',
+                        _hasCvUploaded
+                            ? (_cvFileName != null ? 'CV uploaded: $_cvFileName' : 'CV uploaded successfully')
+                            : 'No CV uploaded yet',
                         style: TextStyle(
                           fontFamily: 'Be Vietnam Pro',
-                          fontFamilyFallback: ['sans-serif'],
+                          fontFamilyFallback: const ['sans-serif'],
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF4C4C58),
+                          color: isDark ? const Color(0xFFA0A0B2) : const Color(0xFF4C4C58),
                         ),
                       ),
                     ),
+                    if (!_hasCvUploaded)
+                      TextButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                          );
+                          _loadUserData();
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.accentOrange,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        ),
+                        child: const Text(
+                          'Upload',
+                          style: TextStyle(
+                            fontFamily: 'Be Vietnam Pro',
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -241,6 +281,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.description_outlined,
                     label: 'Resume Analysis',
                     labelStyle: _cardTitleStyle,
+                    iconBgColor: iconBgColor,
+                    borderColor: cardBorderColor,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -254,6 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.work_outline,
                     label: 'Internships',
                     labelStyle: _cardTitleStyle,
+                    iconBgColor: iconBgColor,
+                    borderColor: cardBorderColor,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -267,6 +311,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.school_outlined,
                     label: 'Scholarships',
                     labelStyle: _cardTitleStyle,
+                    iconBgColor: iconBgColor,
+                    borderColor: cardBorderColor,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -279,6 +325,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.trending_up_outlined,
                     label: 'Skill Roadmap',
                     labelStyle: _cardTitleStyle,
+                    iconBgColor: iconBgColor,
+                    borderColor: cardBorderColor,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -328,8 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: _primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: primaryColor,
         unselectedItemColor: _inactiveColor,
         selectedLabelStyle: const TextStyle(
           fontFamily: 'Be Vietnam Pro',
@@ -341,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
           fontFamilyFallback: ['sans-serif'],
           fontWeight: FontWeight.w600,
         ),
-        onTap: (index) {
+        onTap: (index) async {
           setState(() {
             _selectedIndex = index;
           });
@@ -353,12 +401,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           } else if (index == 2) {
-            Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const ProfileScreen(),
               ),
             );
+            _loadUserData();
           } else if (index == 3) {
             Navigator.push(
               context,
@@ -411,7 +460,7 @@ class _StatusCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor),
         boxShadow: const [
@@ -439,12 +488,16 @@ class _ToolCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.labelStyle,
+    required this.iconBgColor,
+    required this.borderColor,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
   final TextStyle labelStyle;
+  final Color iconBgColor;
+  final Color borderColor;
   final VoidCallback? onTap;
 
   @override
@@ -457,9 +510,9 @@ class _ToolCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE8E1F5)),
+            border: Border.all(color: borderColor),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x10000000),
@@ -476,12 +529,12 @@ class _ToolCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2EDFC),
+                  color: iconBgColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: _HomeIconColor.iconColor,
+                  color: AppColors.accentOrange,
                   size: 24,
                 ),
               ),
@@ -493,8 +546,4 @@ class _ToolCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _HomeIconColor {
-  static const Color iconColor = AppColors.accentOrange;
 }

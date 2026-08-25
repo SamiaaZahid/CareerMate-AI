@@ -1,14 +1,17 @@
+import 'dart:io';
 import 'dart:math' as math;
-import '../services/auth_service.dart';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+import '../services/auth_service.dart';
+import '../services/db_service.dart';
 import 'home_screen.dart';
 import 'resume_analysis_screen.dart';
 import 'settings_screen.dart';
-import '../constants/app_colors.dart';
-import 'package:file_picker/file_picker.dart';
-import '../services/db_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +21,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const Color _backgroundColor = Color(0xFFF5F5F7);
   static const Color _primaryColor = Color(0xFF54309C);
   static const Color _borderColor = Color(0xFFE8E1F5);
   static const Color _inactiveColor = Color(0xFF8B8B98);
@@ -35,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _skills = ['Data Analysis', 'Python', 'UX Design'];
   String? _resumePath;
   String? _photoPath;
+  Uint8List? _photoBytes;
   String? _fullName;
   final List<String> _yearOptions = const [
     '1st Year',
@@ -44,32 +47,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Graduate',
   ];
 
-  
-
-  TextStyle get _sectionStyle => const TextStyle(
+  TextStyle get _sectionStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
-  
-
-  TextStyle get _fieldStyle => const TextStyle(
+  TextStyle get _fieldStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 15,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
-  
+
+  Widget _buildAvatarWidget(Color primaryColor, Color iconBgColor) {
+    if (_photoBytes != null && _photoBytes!.isNotEmpty) {
+      return ClipOval(
+        child: Image.memory(
+          _photoBytes!,
+          key: ValueKey('bytes-${_photoBytes.hashCode}-${DateTime.now().millisecondsSinceEpoch}'),
+          width: 106,
+          height: 106,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
+        ),
+      );
+    }
+    if (_photoPath != null && _photoPath!.isNotEmpty) {
+      final photoPath = _photoPath!;
+      final isNetwork = photoPath.startsWith('http://') || photoPath.startsWith('https://');
+      final imageKey = ValueKey('$photoPath-${DateTime.now().millisecondsSinceEpoch}');
+
+      if (isNetwork) {
+        return ClipOval(
+          child: Image.network(
+            photoPath,
+            key: imageKey,
+            width: 106,
+            height: 106,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
+          ),
+        );
+      } else if (!kIsWeb && File(photoPath).existsSync()) {
+        return ClipOval(
+          child: Image.file(
+            File(photoPath),
+            key: imageKey,
+            width: 106,
+            height: 106,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
+          ),
+        );
+      }
+    }
+    return _buildDefaultAvatarIcon(primaryColor, iconBgColor);
+  }
+
+  Widget _buildDefaultAvatarIcon(Color primaryColor, Color iconBgColor) {
+    return Center(
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: iconBgColor,
+        ),
+        child: Icon(
+          Icons.person,
+          size: 36,
+          color: primaryColor,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFF9D7BEE) : _primaryColor;
+    final cardBg = Theme.of(context).cardColor;
+    final iconBgColor = isDark ? const Color(0xFF2C2540) : const Color(0xFFF2EDFC);
+    final borderColor = isDark ? const Color(0xFF2C2C35) : _borderColor;
+
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: _primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -96,10 +163,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFE8E1F5),
+                          color: borderColor,
                           width: 4,
                         ),
-                        color: Colors.white,
+                        color: cardBg,
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x10000000),
@@ -108,21 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFFF2EDFC),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            size: 36,
-                            color: _primaryColor,
-                          ),
-                        ),
-                      ),
+                      child: _buildAvatarWidget(primaryColor, iconBgColor),
                     ),
                     const SizedBox(height: 14),
                     if (_fullName != null)
@@ -130,23 +183,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.only(bottom: 6),
                         child: Text(
                           _fullName!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: ['sans-serif'],
+                            fontFamilyFallback: const ['sans-serif'],
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F1F28),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
-                    if (_photoPath != null)
+                    if (_photoPath != null || _photoBytes != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
                           'Photo saved',
                           style: TextStyle(
                             fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: ['sans-serif'],
+                            fontFamilyFallback: const ['sans-serif'],
                             fontSize: 12,
                             color: _successColor,
                             fontWeight: FontWeight.w700,
@@ -163,6 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                           if (result.isEmpty) return;
                           final file = result.first;
+                          final bytes = await file.readAsBytes();
                           try {
                             final userId = AuthService.instance.currentUserId;
                             if (userId == null) {
@@ -170,8 +224,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to update your profile')));
                               return;
                             }
-                            await DbService.instance.updateUserById(userId, {'photo_path': file.path});
+                            final photoPathToSave = file.path ?? file.name;
+                            await DbService.instance.updateUserById(userId, {'photo_path': photoPathToSave});
+                            PaintingBinding.instance.imageCache.clear();
+                            PaintingBinding.instance.imageCache.clearLiveImages();
                             if (!context.mounted) return;
+                            setState(() {
+                              _photoBytes = bytes;
+                              _photoPath = photoPathToSave;
+                            });
                             final messenger = ScaffoldMessenger.of(context);
                             final double snackLeft = MediaQuery.of(context).size.width * 0.5;
                             messenger.showSnackBar(
@@ -219,14 +280,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-                    const SizedBox(height: 24),
-                    // Load user data on first build
-                    FutureBuilder(
-                      future: _loadUser(),
-                      builder: (context, snapshot) {
-                        return const SizedBox.shrink();
-                      },
-                    ),
+              const SizedBox(height: 24),
+              FutureBuilder(
+                future: _loadUser(),
+                builder: (context, snapshot) {
+                  return const SizedBox.shrink();
+                },
+              ),
               _FieldGroup(
                 label: 'Full Name',
                 child: TextField(
@@ -235,6 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(
                     hintText: 'Enter your full name',
                     icon: Icons.person_outline,
+                    primaryColor: primaryColor,
                   ),
                 ),
               ),
@@ -247,6 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(
                     hintText: 'e.g. BSc Computer Science',
                     icon: Icons.school_outlined,
+                    primaryColor: primaryColor,
                   ),
                 ),
               ),
@@ -259,6 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(
                     hintText: 'Enter college or institution',
                     icon: Icons.account_balance_outlined,
+                    primaryColor: primaryColor,
                   ),
                 ),
               ),
@@ -268,10 +331,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: DropdownButtonFormField<String>(
                   initialValue: _selectedYear,
                   style: _fieldStyle,
-                  iconEnabledColor: _primaryColor,
+                  dropdownColor: cardBg,
+                  iconEnabledColor: primaryColor,
                   decoration: _inputDecoration(
                     hintText: 'Select year',
                     icon: Icons.calendar_today_outlined,
+                    primaryColor: primaryColor,
                   ),
                   items: _yearOptions
                       .map(
@@ -298,6 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(
                     hintText: 'Enter preferred location',
                     icon: Icons.location_on_outlined,
+                    primaryColor: primaryColor,
                   ),
                 ),
               ),
@@ -308,9 +374,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFD8D8E3)),
+                    border: Border.all(color: borderColor),
                   ),
                   child: Wrap(
                     spacing: 10,
@@ -323,21 +389,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF2EDFC),
+                              color: iconBgColor,
                               borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: _borderColor),
+                              border: Border.all(color: borderColor),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   '$skill ×',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Be Vietnam Pro',
-                                    fontFamilyFallback: ['sans-serif'],
+                                    fontFamilyFallback: const ['sans-serif'],
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: _primaryColor,
+                                    color: primaryColor,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -347,10 +413,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       _skills.remove(skill);
                                     });
                                   },
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close,
                                     size: 16,
-                                    color: _primaryColor,
+                                    color: primaryColor,
                                   ),
                                 ),
                               ],
@@ -371,6 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(
                     hintText: 'Describe your career goals',
                     icon: Icons.flag_outlined,
+                    primaryColor: primaryColor,
                   ),
                 ),
               ),
@@ -380,23 +447,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _UploadArea(
                 primaryColor: AppColors.accentOrange,
                 onChooseFile: () async {
-                  final result = await FilePicker.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['pdf', 'doc', 'docx'],
-                  );
-                  if (result.isEmpty) return;
-                  final file = result.first;
-                  // save path to DB (example: upsert user with resume_path)
                   try {
+                    final result = await FilePicker.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['pdf', 'doc', 'docx'],
+                    );
+                    if (result.isEmpty) return;
+                    final file = result.first;
+                    final bytes = await file.readAsBytes();
+                    debugPrint('[ProfileScreen] CV picked: ${file.name}, bytes length: ${bytes.length}');
+
                     final userId = AuthService.instance.currentUserId;
+                    debugPrint('[ProfileScreen] Current userId: $userId');
                     if (userId == null) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to upload your resume')));
                       return;
                     }
-                    await DbService.instance.updateUserById(userId, {'resume_path': file.path});
+                    final resumePathToSave = file.path ?? file.name;
+                    debugPrint('[ProfileScreen] Updating user $userId with resume_path: $resumePathToSave');
+
+                    final updateResult = await DbService.instance.updateUserById(userId, {'resume_path': resumePathToSave});
+                    debugPrint('[ProfileScreen] updateUserById result: $updateResult');
+
                     setState(() {
-                      _resumePath = file.path;
+                      _resumePath = resumePathToSave;
                     });
                     if (!context.mounted) return;
                     final messenger = ScaffoldMessenger.of(context);
@@ -409,7 +484,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         content: Text('Uploaded: ${file.name}', style: const TextStyle(color: Colors.white)),
                       ),
                     );
-                  } catch (e) {
+                  } catch (e, st) {
+                    debugPrint('[ProfileScreen] Error uploading CV: $e\n$st');
                     if (!context.mounted) return;
                     final messenger = ScaffoldMessenger.of(context);
                     final double snackLeft = MediaQuery.of(context).size.width * 0.5;
@@ -429,7 +505,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFFD8F0DD)),
                   ),
@@ -543,8 +619,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: _primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: primaryColor,
         unselectedItemColor: _inactiveColor,
         selectedLabelStyle: const TextStyle(
           fontFamily: 'Be Vietnam Pro',
@@ -637,7 +713,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   InputDecoration _inputDecoration({
     required String hintText,
     required IconData icon,
+    required Color primaryColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hintText,
       hintStyle: const TextStyle(
@@ -646,20 +724,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         fontSize: 15,
         color: Color(0xFF9A9AA6),
       ),
-      prefixIcon: Icon(icon, color: _primaryColor),
+      prefixIcon: Icon(icon, color: primaryColor),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Theme.of(context).cardColor,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 18,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFD8D8E3)),
+        borderSide: BorderSide(color: isDark ? const Color(0xFF2C2C35) : const Color(0xFFD8D8E3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _primaryColor, width: 1.4),
+        borderSide: BorderSide(color: primaryColor, width: 1.4),
       ),
     );
   }
@@ -678,12 +756,12 @@ class _FieldGroup extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Be Vietnam Pro',
-            fontFamilyFallback: ['sans-serif'],
+            fontFamilyFallback: const ['sans-serif'],
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1F1F28),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -704,9 +782,13 @@ class _UploadArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = Theme.of(context).cardColor;
+    final iconBgColor = isDark ? const Color(0xFF2C2540) : const Color(0xFFF2EDFC);
+
     return CustomPaint(
       painter: _DashedBorderPainter(
-        color: const Color(0xFFBFAEE6),
+        color: isDark ? const Color(0xFF4A3E6B) : const Color(0xFFBFAEE6),
         radius: 12,
         strokeWidth: 1.3,
         dashWidth: 8,
@@ -716,7 +798,7 @@ class _UploadArea extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardBg,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -725,7 +807,7 @@ class _UploadArea extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFFF2EDFC),
+                color: iconBgColor,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -735,15 +817,15 @@ class _UploadArea extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Upload your CV (PDF)',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Be Vietnam Pro',
-                fontFamilyFallback: ['sans-serif'],
+                fontFamilyFallback: const ['sans-serif'],
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1F1F28),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 6),

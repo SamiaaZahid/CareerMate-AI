@@ -10,11 +10,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static const Color _backgroundColor = Color(0xFFF5F5F7);
   static const Color _primaryColor = Color(0xFF54309C);
-  static const Color _borderColor = Color(0xFFE8E1F5);
   static const Color _userBubbleColor = Color(0xFF54309C);
-  static const Color _aiBubbleColor = Colors.white;
 
   final ChatService _chatService = ChatService();
   final TextEditingController _inputController = TextEditingController();
@@ -30,11 +27,11 @@ class _ChatScreenState extends State<ChatScreen> {
         color: Colors.white,
       );
 
-  TextStyle get _bubbleTextStyle => const TextStyle(
+  TextStyle get _bubbleTextStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
+        fontFamilyFallback: const ['sans-serif'],
         fontSize: 14,
-        color: Color(0xFF1F1F28),
+        color: Theme.of(context).colorScheme.onSurface,
       );
 
   @override
@@ -72,12 +69,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? const Color(0xFF9D7BEE) : _primaryColor;
     final messages = _chatService.messages;
 
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: _primaryColor,
+        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : _primaryColor,
         title: Text('CareerMate Assistant', style: _titleStyle),
       ),
       body: Column(
@@ -89,17 +88,18 @@ class _ChatScreenState extends State<ChatScreen> {
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: messages.length,
-                    itemBuilder: (context, index) => _buildBubble(messages[index]),
+                    itemBuilder: (context, index) => _buildBubble(messages[index], primaryColor),
                   ),
           ),
-          if (_isSending) _buildTypingIndicator(),
-          _buildInputBar(),
+          if (_isSending) _buildTypingIndicator(primaryColor),
+          _buildInputBar(primaryColor),
         ],
       ),
     );
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -111,15 +111,19 @@ class _ChatScreenState extends State<ChatScreen> {
             fontFamily: 'Be Vietnam Pro',
             fontFamilyFallback: const ['sans-serif'],
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: isDark ? const Color(0xFF9A9AA6) : Colors.grey.shade600,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBubble(ChatMessage message) {
+  Widget _buildBubble(ChatMessage message, Color primaryColor) {
     final isUser = message.isUser;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userBubble = isDark ? const Color(0xFF6B45BA) : _userBubbleColor;
+    final aiBubble = Theme.of(context).cardColor;
+    final borderColor = isDark ? const Color(0xFF2C2C35) : const Color(0xFFE8E1F5);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -128,24 +132,24 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isUser ? _userBubbleColor : _aiBubbleColor,
+          color: isUser ? userBubble : aiBubble,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
             bottomLeft: Radius.circular(isUser ? 16 : 4),
             bottomRight: Radius.circular(isUser ? 4 : 16),
           ),
-          border: isUser ? null : Border.all(color: _borderColor),
+          border: isUser ? null : Border.all(color: borderColor),
         ),
         child: Text(
           message.text,
-          style: _bubbleTextStyle.copyWith(color: isUser ? Colors.white : const Color(0xFF1F1F28)),
+          style: _bubbleTextStyle.copyWith(color: isUser ? Colors.white : Theme.of(context).colorScheme.onSurface),
         ),
       ),
     );
   }
 
-  Widget _buildTypingIndicator() {
+  Widget _buildTypingIndicator(Color primaryColor) {
     return Padding(
       padding: const EdgeInsets.only(left: 16, bottom: 8),
       child: Align(
@@ -153,18 +157,21 @@ class _ChatScreenState extends State<ChatScreen> {
         child: SizedBox(
           width: 18,
           height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2, color: _primaryColor),
+          child: CircularProgressIndicator(strokeWidth: 2, color: primaryColor),
         ),
       ),
     );
   }
 
-  Widget _buildInputBar() {
+  Widget _buildInputBar(Color primaryColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark ? const Color(0xFF2C2C35) : const Color(0xFFE8E1F5);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _borderColor)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(top: BorderSide(color: borderColor)),
       ),
       child: SafeArea(
         top: false,
@@ -176,11 +183,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 minLines: 1,
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 onSubmitted: (_) => _handleSend(),
                 decoration: InputDecoration(
                   hintText: 'Ask about internships, scholarships, your profile...',
+                  hintStyle: const TextStyle(
+                    fontFamily: 'Be Vietnam Pro',
+                    color: Color(0xFF9A9AA6),
+                  ),
                   filled: true,
-                  fillColor: _backgroundColor,
+                  fillColor: Theme.of(context).scaffoldBackgroundColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -193,9 +208,9 @@ class _ChatScreenState extends State<ChatScreen> {
             IconButton(
               onPressed: _isSending ? null : _handleSend,
               icon: const Icon(Icons.send_rounded),
-              color: _primaryColor,
+              color: primaryColor,
               style: IconButton.styleFrom(
-                backgroundColor: _backgroundColor,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 shape: const CircleBorder(),
               ),
             ),
