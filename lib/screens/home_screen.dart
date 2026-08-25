@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'program_listing_screen.dart';
 import 'resume_analysis_screen.dart';
@@ -97,6 +98,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
+            tooltip: 'AI Assistant',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatScreen()),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Container(
@@ -285,8 +296,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 54,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('AI Career Chat coming soon')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ChatScreen()),
                     );
                   },
                   icon: const Icon(Icons.chat_bubble_outline),
