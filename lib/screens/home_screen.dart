@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ai_chat_screen.dart'; 
 
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
@@ -285,8 +286,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 54,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('AI Career Chat coming soon')),
+                    // Yahan SnackBar ki jagah ab AiChatScreen par navigate hoga!
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AiChatScreen(),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.chat_bubble_outline),
