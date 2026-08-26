@@ -1,4 +1,5 @@
 import 'chat_context_builder.dart';
+import 'chat_tools.dart';
 import 'gemini_service.dart';
 
 /// A single message shown in the chat UI.
@@ -10,7 +11,9 @@ class ChatMessage {
 }
 
 /// Owns the running conversation for the AI chat screen. Rebuilds the
-/// app context on every message so the chat always reflects current data.
+/// app context on every message so the chat always reflects current
+/// data, and can hand off to [ChatTools] when the user asks it to
+/// actually do something rather than just answer a question.
 class ChatService {
   ChatService();
 
@@ -24,17 +27,40 @@ class ChatService {
     }
 
     messages.add(ChatMessage(text: trimmed, isUser: true));
+    _history.add(GeminiChatTurn.user(trimmed));
 
     final systemInstruction = await ChatContextBuilder.build();
 
-    final replyText = await GeminiService.instance.sendMessage(
-      userMessage: trimmed,
+    var result = await GeminiService.instance.send(
+      contents: _history,
       systemInstruction: systemInstruction,
-      history: _history,
+      toolDeclarations: ChatTools.declarations,
     );
 
-    _history.add(GeminiChatTurn(role: 'user', text: trimmed));
-    _history.add(GeminiChatTurn(role: 'model', text: replyText));
+    // If Gemini wants to run an action, do it, tell Gemini what
+    // happened, and ask it to continue. Capped so a misbehaving model
+    // can't loop forever.
+    var remainingSteps = 3;
+    while (result.isFunctionCall && remainingSteps > 0) {
+      remainingSteps--;
+
+      final name = result.functionCallName!;
+      final args = result.functionCallArgs!;
+
+      _history.add(GeminiChatTurn.functionCall(name, args, thoughtSignature: result.thoughtSignature));
+
+      final executionResult = await ChatTools.execute(name, args);
+      _history.add(GeminiChatTurn.functionResponse(name, {'result': executionResult}));
+
+      result = await GeminiService.instance.send(
+        contents: _history,
+        systemInstruction: systemInstruction,
+        toolDeclarations: ChatTools.declarations,
+      );
+    }
+
+    final replyText = result.text ?? 'Done!';
+    _history.add(GeminiChatTurn.model(replyText));
 
     final reply = ChatMessage(text: replyText, isUser: false);
     messages.add(reply);

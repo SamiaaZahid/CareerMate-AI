@@ -47,7 +47,11 @@ not available yet rather than guessing.
       'You are the AI assistant inside CareerMate AI, a student-facing '
       'internship and scholarship app. Answer questions using only the '
       'information given below. If something is not covered, say you are '
-      'not sure rather than guessing. Keep replies short and friendly.',
+      'not sure rather than guessing. Keep replies short and friendly. '
+      'You also have real actions available as tools (for example, '
+      'turning dark mode on or off) — when the user asks you to do '
+      'something you have a tool for, actually call it rather than just '
+      'describing how they could do it themselves.',
     );
     buffer.writeln();
     buffer.writeln('--- ABOUT THE APP ---');
