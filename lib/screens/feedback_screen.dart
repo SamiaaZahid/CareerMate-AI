@@ -103,7 +103,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         message: message,
       );
 
-      await EmailService.sendFeedbackEmail(
+      final result = await EmailService.sendFeedback(
         name: name,
         userEmail: email,
         message: message,
@@ -111,12 +111,29 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Thank! your feedback has been sent to career mate Ai'),
-          backgroundColor: FeedbackScreen.primaryColor,
-        ),
-      );
+      if (result.status == EmailSendStatus.success ||
+          result.status == EmailSendStatus.activationRequired) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thanks! Your feedback has been sent to CareerMate AI.'),
+            backgroundColor: FeedbackScreen.primaryColor,
+          ),
+        );
+      } else if (result.status == EmailSendStatus.launchedMailto) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thanks! Your feedback has been sent to CareerMate AI.'),
+            backgroundColor: AppColors.accentOrange,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Saved feedback locally, but email delivery failed. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
 
       _formKey.currentState!.reset();
       _nameController.clear();

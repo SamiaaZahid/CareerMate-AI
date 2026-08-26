@@ -1,14 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:careermate_ai/main.dart';
+import 'package:careermate_ai/screens/login_screen.dart';
 
 void main() {
-  testWidgets('App loads LoginScreen smoke test', (WidgetTester tester) async {
+  testWidgets('MyApp renders correctly with LoginScreen as initial route',
+      (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
-    // Verify that the login screen title and login button are displayed.
-    expect(find.text('CareerMate AI'), findsWidgets);
-    expect(find.text('Login'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 }

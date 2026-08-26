@@ -23,7 +23,7 @@ class GeminiChatTurn {
       GeminiChatTurn._('model', [
         {
           'functionCall': {'name': name, 'args': args},
-          if (thoughtSignature != null) 'thoughtSignature': thoughtSignature,
+          'thoughtSignature': ?thoughtSignature,
         }
       ]);
 

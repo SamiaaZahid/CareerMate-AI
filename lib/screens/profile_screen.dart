@@ -10,6 +10,7 @@ import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
 import '../services/resume_text_extractor.dart';
+import '../services/theme_service.dart';
 import '../widgets/user_avatar_widget.dart';
 import 'home_screen.dart';
 import 'resume_analysis_screen.dart';
@@ -23,9 +24,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const Color _primaryColor = Color(0xFF54309C);
-  static const Color _borderColor = Color(0xFFE8E1F5);
-  static const Color _inactiveColor = Color(0xFF8B8B98);
   static const Color _successColor = Color(0xFF2FA84F);
 
   final TextEditingController _fullNameController = TextEditingController();
@@ -38,6 +36,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedIndex = 2;
   String _selectedYear = '3rd Year';
   final List<String> _skills = ['Data Analysis', 'Python', 'UX Design'];
+
+  String? _resumePath;
+  String? _photoPath;
+  Uint8List? _photoBytes;
+  String? _fullName;
+
+  static const List<String> _yearOptions = [
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year',
+    'Graduated / Other',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
 
   @override
   void dispose() {
@@ -65,32 +82,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _skillInputController.clear();
     });
   }
-  String? _resumePath;
-  String? _photoPath;
-  Uint8List? _photoBytes;
-  String? _fullName;
-  final List<String> _yearOptions = const [
-    '1st Year',
-    '2nd Year',
-    '3rd Year',
-    '4th Year',
-    'Graduate',
-  ];
 
   TextStyle get _sectionStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
         fontFamilyFallback: const ['sans-serif'],
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: ThemeService.instance.colors.primaryText,
       );
 
   TextStyle get _fieldStyle => TextStyle(
         fontFamily: 'Be Vietnam Pro',
         fontFamilyFallback: const ['sans-serif'],
         fontSize: 15,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: ThemeService.instance.colors.primaryText,
       );
+
+  InputDecoration _inputDecoration({
+    required String hintText,
+    required IconData icon,
+    required AppThemeColors colors,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(
+        fontFamily: 'Be Vietnam Pro',
+        fontFamilyFallback: const ['sans-serif'],
+        fontSize: 15,
+        color: colors.subtitleText,
+      ),
+      prefixIcon: Icon(icon, color: colors.primaryPurple),
+      filled: true,
+      fillColor: colors.inputFillColor,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 18,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colors.borderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colors.primaryPurple, width: 1.4),
+      ),
+    );
+  }
 
   Widget _buildAvatarWidget(Color primaryColor, Color iconBgColor) {
     return UserAvatarWidget(
@@ -104,650 +141,660 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _loadUser();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF9D7BEE) : _primaryColor;
-    final cardBg = Theme.of(context).cardColor;
-    final iconBgColor = isDark ? const Color(0xFF2C2540) : const Color(0xFFF2EDFC);
-    final borderColor = isDark ? const Color(0xFF2C2C35) : _borderColor;
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: isDark ? Theme.of(context).colorScheme.surface : primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            fontFamily: 'Be Vietnam Pro',
-            fontFamilyFallback: ['sans-serif'],
-            fontWeight: FontWeight.bold,
+    return AnimatedBuilder(
+      animation: ThemeService.instance,
+      builder: (context, _) {
+        final colors = ThemeService.instance.colors;
+        return Scaffold(
+          backgroundColor: colors.scaffoldBackground,
+          appBar: AppBar(
+            backgroundColor: colors.appBarBackground,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            title: const Text(
+              'My Profile',
+              style: TextStyle(
+                fontFamily: 'Be Vietnam Pro',
+                fontFamilyFallback: ['sans-serif'],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 114,
-                      height: 114,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: borderColor,
-                          width: 4,
-                        ),
-                        color: cardBg,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x10000000),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: _buildAvatarWidget(primaryColor, iconBgColor),
-                    ),
-                    const SizedBox(height: 14),
-                    if (_fullName != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          _fullName!,
-                          style: TextStyle(
-                            fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: const ['sans-serif'],
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                    if (_photoPath != null || _photoBytes != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          'Photo saved',
-                          style: TextStyle(
-                            fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: const ['sans-serif'],
-                            fontSize: 12,
-                            color: _successColor,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    SizedBox(
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final result = await FilePicker.pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: ['jpg', 'jpeg', 'png'],
-                          );
-                          if (result.isEmpty) return;
-                          final file = result.first;
-                          final bytes = await file.readAsBytes();
-                          if (bytes.lengthInBytes > 5 * 1024 * 1024) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Image file too large. Maximum size is 5MB.')),
-                            );
-                            return;
-                          }
-                          try {
-                            final userId = AuthService.instance.currentUserId;
-                            if (userId == null) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to update your profile')));
-                              return;
-                            }
-                            String photoPathToSave;
-                            if (kIsWeb) {
-                              final ext = file.name.contains('.') ? file.name.split('.').last.toLowerCase() : 'png';
-                              final mimeType = (ext == 'jpg' || ext == 'jpeg') ? 'image/jpeg' : 'image/png';
-                              final base64Str = base64Encode(bytes);
-                              photoPathToSave = 'data:$mimeType;base64,$base64Str';
-                            } else {
-                              photoPathToSave = file.path ?? file.name;
-                            }
-                            await DbService.instance.updateUserById(userId, {'photo_path': photoPathToSave});
-                            PaintingBinding.instance.imageCache.clear();
-                            PaintingBinding.instance.imageCache.clearLiveImages();
-                            if (!context.mounted) return;
-                            setState(() {
-                              final ts = DateTime.now().toIso8601String();
-                              debugPrint('[$ts] [ProfileScreen] setState via Edit Photo -> _photoBytes length: ${bytes.length}');
-                              _photoBytes = bytes;
-                              _photoPath = photoPathToSave;
-                            });
-                            final messenger = ScaffoldMessenger.of(context);
-                            final double snackLeft = MediaQuery.of(context).size.width * 0.5;
-                            messenger.showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                                backgroundColor: AppColors.primaryPurple,
-                                content: Text('Profile photo updated: ${file.name}', style: const TextStyle(color: Colors.white)),
-                              ),
-                            );
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            final messenger = ScaffoldMessenger.of(context);
-                            final double snackLeft = MediaQuery.of(context).size.width * 0.5;
-                            messenger.showSnackBar(
-                              SnackBar(
-                                behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                                backgroundColor: AppColors.primaryPurple,
-                                content: Text('Failed to save photo: $e', style: const TextStyle(color: Colors.white)),
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accentOrange,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
-                        child: const Text(
-                          'Edit Photo',
-                          style: TextStyle(
-                            fontFamily: 'Be Vietnam Pro',
-                            fontFamilyFallback: ['sans-serif'],
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              _FieldGroup(
-                label: 'Full Name',
-                child: TextField(
-                  controller: _fullNameController,
-                  style: _fieldStyle,
-                  decoration: _inputDecoration(
-                    hintText: 'Enter your full name',
-                    icon: Icons.person_outline,
-                    primaryColor: primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'Education/Degree',
-                child: TextField(
-                  controller: _degreeController,
-                  style: _fieldStyle,
-                  decoration: _inputDecoration(
-                    hintText: 'e.g. BSc Computer Science',
-                    icon: Icons.school_outlined,
-                    primaryColor: primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'College/Institution',
-                child: TextField(
-                  controller: _collegeController,
-                  style: _fieldStyle,
-                  decoration: _inputDecoration(
-                    hintText: 'Enter college or institution',
-                    icon: Icons.account_balance_outlined,
-                    primaryColor: primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'Year of Study',
-                child: DropdownButtonFormField<String>(
-                  initialValue: _selectedYear,
-                  style: _fieldStyle,
-                  dropdownColor: cardBg,
-                  iconEnabledColor: primaryColor,
-                  decoration: _inputDecoration(
-                    hintText: 'Select year',
-                    icon: Icons.calendar_today_outlined,
-                    primaryColor: primaryColor,
-                  ),
-                  items: _yearOptions
-                      .map(
-                        (year) => DropdownMenuItem<String>(
-                          value: year,
-                          child: Text(year),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() {
-                      _selectedYear = value;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'Preferred Location',
-                child: TextField(
-                  controller: _preferredLocationController,
-                  style: _fieldStyle,
-                  decoration: _inputDecoration(
-                    hintText: 'Enter preferred location',
-                    icon: Icons.location_on_outlined,
-                    primaryColor: primaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'Key Skills',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _skillInputController,
-                            style: _fieldStyle,
-                            onSubmitted: (_) => _addSkill(),
-                            decoration: _inputDecoration(
-                              hintText: 'Add a new skill (e.g. Flutter, SQL)',
-                              icon: Icons.code_rounded,
-                              primaryColor: primaryColor,
+                        Container(
+                          width: 114,
+                          height: 114,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: colors.borderColor,
+                              width: 4,
+                            ),
+                            color: colors.surfaceCard,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x10000000),
+                                blurRadius: 12,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: _buildAvatarWidget(colors.primaryPurple, colors.chipBackground),
+                        ),
+                        const SizedBox(height: 14),
+                        if (_fullName != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text(
+                              _fullName!,
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontFamilyFallback: const ['sans-serif'],
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: colors.primaryText,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: _addSkill,
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Add'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        if ((_photoPath != null && _photoPath!.isNotEmpty) || _photoBytes != null)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              'Photo saved',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontFamilyFallback: ['sans-serif'],
+                                fontSize: 12,
+                                color: _successColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        SizedBox(
+                          height: 40,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final result = await FilePicker.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: ['jpg', 'jpeg', 'png'],
+                              );
+                              if (result.isEmpty) return;
+                              final file = result.first;
+                              final bytes = await file.readAsBytes();
+                              if (bytes.lengthInBytes > 5 * 1024 * 1024) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Image file too large. Maximum size is 5MB.')),
+                                );
+                                return;
+                              }
+                              try {
+                                final userId = AuthService.instance.currentUserId;
+                                if (userId == null) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to update your profile')));
+                                  return;
+                                }
+                                String photoPathToSave;
+                                if (kIsWeb) {
+                                  final ext = file.name.contains('.') ? file.name.split('.').last.toLowerCase() : 'png';
+                                  final mimeType = (ext == 'jpg' || ext == 'jpeg') ? 'image/jpeg' : 'image/png';
+                                  final base64Str = base64Encode(bytes);
+                                  photoPathToSave = 'data:$mimeType;base64,$base64Str';
+                                } else {
+                                  photoPathToSave = file.path ?? file.name;
+                                }
+                                await DbService.instance.updateUserById(userId, {'photo_path': photoPathToSave});
+                                PaintingBinding.instance.imageCache.clear();
+                                PaintingBinding.instance.imageCache.clearLiveImages();
+                                if (!context.mounted) return;
+                                setState(() {
+                                  _photoBytes = bytes;
+                                  _photoPath = photoPathToSave;
+                                });
+                                final messenger = ScaffoldMessenger.of(context);
+                                final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                                    backgroundColor: colors.primaryPurple,
+                                    content: Text('Profile photo updated: ${file.name}', style: const TextStyle(color: Colors.white)),
+                                  ),
+                                );
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                final messenger = ScaffoldMessenger.of(context);
+                                final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                                    backgroundColor: colors.primaryPurple,
+                                    content: Text('Failed to save photo: $e', style: const TextStyle(color: Colors.white)),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.accentOrange,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                            child: const Text(
+                              'Edit Photo',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontFamilyFallback: ['sans-serif'],
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: borderColor),
-                      ),
-                      child: Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: _skills
-                            .map(
-                              (skill) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: iconBgColor,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(color: borderColor),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      skill,
-                                      style: TextStyle(
-                                        fontFamily: 'Be Vietnam Pro',
-                                        fontFamilyFallback: const ['sans-serif'],
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _skills.remove(skill);
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.close,
-                                        size: 16,
-                                        color: primaryColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            .toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  _FieldGroup(
+                    label: 'Full Name',
+                    labelColor: colors.primaryText,
+                    child: TextField(
+                      controller: _fullNameController,
+                      style: _fieldStyle,
+                      decoration: _inputDecoration(
+                        hintText: 'Enter your full name',
+                        icon: Icons.person_outline,
+                        colors: colors,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              _FieldGroup(
-                label: 'Career Goals',
-                child: TextField(
-                  controller: _careerGoalsController,
-                  style: _fieldStyle,
-                  maxLines: 3,
-                  decoration: _inputDecoration(
-                    hintText: 'Describe your career goals',
-                    icon: Icons.flag_outlined,
-                    primaryColor: primaryColor,
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text('Resume / CV', style: _sectionStyle),
-              const SizedBox(height: 12),
-              _UploadArea(
-                primaryColor: AppColors.accentOrange,
-                onChooseFile: () async {
-                  try {
-                    final result = await FilePicker.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['pdf', 'doc', 'docx'],
-                    );
-                    if (result.isEmpty) return;
-                    final file = result.first;
-                    final bytes = await file.readAsBytes();
-                    debugPrint('[ProfileScreen] CV picked: ${file.name}, bytes length: ${bytes.length}');
-
-                    final userId = AuthService.instance.currentUserId;
-                    debugPrint('[ProfileScreen] Current userId: $userId');
-                    if (userId == null) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to upload your resume')));
-                      return;
-                    }
-                    final resumePathToSave = file.path ?? file.name;
-                    debugPrint('[ProfileScreen] Updating user $userId with resume_path: $resumePathToSave');
-
-                    final extraction = await ResumeTextExtractor.extract(bytes, file.name);
-                    debugPrint(
-                      '[ProfileScreen] Extraction status: ${extraction.status}, text length: ${extraction.text.length}',
-                    );
-
-                    final updateResult = await DbService.instance.updateUserById(userId, {
-                      'resume_path': resumePathToSave,
-                      'resume_text': extraction.text,
-                    });
-                    debugPrint('[ProfileScreen] updateUserById result: $updateResult');
-
-                    setState(() {
-                      _resumePath = resumePathToSave;
-                    });
-                    if (!context.mounted) return;
-                    final messenger = ScaffoldMessenger.of(context);
-                    final double snackLeft = MediaQuery.of(context).size.width * 0.5;
-
-                    final String snackMessage;
-                    switch (extraction.status) {
-                      case ResumeExtractionStatus.success:
-                        snackMessage = 'Uploaded: ${file.name}';
-                        break;
-                      case ResumeExtractionStatus.unsupportedFormat:
-                        snackMessage = 'Uploaded, but .doc isn\'t supported for AI analysis — '
-                            'please re-upload as PDF or DOCX to get a real resume score.';
-                        break;
-                      case ResumeExtractionStatus.tooShort:
-                        snackMessage = 'Uploaded, but we couldn\'t read much text from this file — '
-                            'if it\'s a scanned/image resume, try a text-based PDF instead.';
-                        break;
-                      case ResumeExtractionStatus.failed:
-                        snackMessage = 'Uploaded, but something went wrong reading this file\'s content.';
-                        break;
-                    }
-
-                    messenger.showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                        backgroundColor: AppColors.primaryPurple,
-                        content: Text(snackMessage, style: const TextStyle(color: Colors.white)),
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'Education/Degree',
+                    labelColor: colors.primaryText,
+                    child: TextField(
+                      controller: _degreeController,
+                      style: _fieldStyle,
+                      decoration: _inputDecoration(
+                        hintText: 'e.g. BSc Computer Science',
+                        icon: Icons.school_outlined,
+                        colors: colors,
                       ),
-                    );
-                  } catch (e, st) {
-                    debugPrint('[ProfileScreen] Error uploading CV: $e\n$st');
-                    if (!context.mounted) return;
-                    final messenger = ScaffoldMessenger.of(context);
-                    final double snackLeft = MediaQuery.of(context).size.width * 0.5;
-                    messenger.showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                        backgroundColor: AppColors.primaryPurple,
-                        content: Text('Failed to save file: $e', style: const TextStyle(color: Colors.white)),
-                      ),
-                    );
-                  }
-                },
-              ),
-              if (_resumePath != null && _resumePath!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFD8F0DD)),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle_rounded,
-                            color: _successColor,
-                            size: 22,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${_resumePath!.split(RegExp(r"[/\\]")).last} uploaded',
-                              style: const TextStyle(
-                                fontFamily: 'Be Vietnam Pro',
-                                fontFamilyFallback: ['sans-serif'],
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: _successColor,
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'College/Institution',
+                    labelColor: colors.primaryText,
+                    child: TextField(
+                      controller: _collegeController,
+                      style: _fieldStyle,
+                      decoration: _inputDecoration(
+                        hintText: 'Enter college or institution',
+                        icon: Icons.account_balance_outlined,
+                        colors: colors,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'Year of Study',
+                    labelColor: colors.primaryText,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _selectedYear,
+                      style: _fieldStyle,
+                      dropdownColor: colors.surfaceCard,
+                      iconEnabledColor: colors.primaryPurple,
+                      decoration: _inputDecoration(
+                        hintText: 'Select year',
+                        icon: Icons.calendar_today_outlined,
+                        colors: colors,
+                      ),
+                      items: _yearOptions
+                          .map(
+                            (year) => DropdownMenuItem<String>(
+                              value: year,
+                              child: Text(
+                                year,
+                                style: TextStyle(
+                                  fontFamily: 'Be Vietnam Pro',
+                                  fontFamilyFallback: const ['sans-serif'],
+                                  fontSize: 15,
+                                  color: colors.primaryText,
+                                ),
                               ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() {
+                          _selectedYear = value;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'Preferred Location',
+                    labelColor: colors.primaryText,
+                    child: TextField(
+                      controller: _preferredLocationController,
+                      style: _fieldStyle,
+                      decoration: _inputDecoration(
+                        hintText: 'Enter preferred location',
+                        icon: Icons.location_on_outlined,
+                        colors: colors,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'Key Skills',
+                    labelColor: colors.primaryText,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _skillInputController,
+                                style: _fieldStyle,
+                                onSubmitted: (_) => _addSkill(),
+                                decoration: _inputDecoration(
+                                  hintText: 'Add a new skill (e.g. Flutter, SQL)',
+                                  icon: Icons.code_rounded,
+                                  colors: colors,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed: _addSkill,
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text('Add'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.primaryPurple,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: colors.surfaceCard,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: colors.borderColor),
+                          ),
+                          child: _skills.isEmpty
+                              ? Text(
+                                  'No skills added yet. Type a skill above and tap Add.',
+                                  style: TextStyle(
+                                    fontFamily: 'Be Vietnam Pro',
+                                    fontFamilyFallback: const ['sans-serif'],
+                                    fontSize: 13,
+                                    color: colors.subtitleText,
+                                  ),
+                                )
+                              : Wrap(
+                                  spacing: 10,
+                                  runSpacing: 10,
+                                  children: _skills
+                                      .map(
+                                        (skill) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: colors.chipBackground,
+                                            borderRadius: BorderRadius.circular(999),
+                                            border: Border.all(color: colors.borderColor),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                skill,
+                                                style: TextStyle(
+                                                  fontFamily: 'Be Vietnam Pro',
+                                                  fontFamilyFallback: const ['sans-serif'],
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: colors.primaryPurple,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  setState(() {
+                                                    _skills.remove(skill);
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  Icons.close,
+                                                  size: 16,
+                                                  color: colors.primaryPurple,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _FieldGroup(
+                    label: 'Career Goals',
+                    labelColor: colors.primaryText,
+                    child: TextField(
+                      controller: _careerGoalsController,
+                      style: _fieldStyle,
+                      maxLines: 3,
+                      decoration: _inputDecoration(
+                        hintText: 'Describe your career goals',
+                        icon: Icons.flag_outlined,
+                        colors: colors,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text('Resume / CV', style: _sectionStyle),
+                  const SizedBox(height: 12),
+                  _UploadArea(
+                    colors: colors,
+                    onChooseFile: () async {
+                      try {
+                        final result = await FilePicker.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf', 'doc', 'docx'],
+                        );
+                        if (result.isEmpty) return;
+                        final file = result.first;
+                        final bytes = await file.readAsBytes();
+
+                        final userId = AuthService.instance.currentUserId;
+                        if (userId == null) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to upload your resume')));
+                          return;
+                        }
+                        final resumePathToSave = file.path ?? file.name;
+
+                        final extraction = await ResumeTextExtractor.extract(bytes, file.name);
+
+                        await DbService.instance.updateUserById(userId, {
+                          'resume_path': resumePathToSave,
+                          'resume_text': extraction.text,
+                        });
+
+                        setState(() {
+                          _resumePath = resumePathToSave;
+                        });
+                        if (!context.mounted) return;
+                        final messenger = ScaffoldMessenger.of(context);
+                        final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+
+                        final String snackMessage;
+                        switch (extraction.status) {
+                          case ResumeExtractionStatus.success:
+                            snackMessage = 'Uploaded: ${file.name}';
+                            break;
+                          case ResumeExtractionStatus.unsupportedFormat:
+                            snackMessage = 'Uploaded, but .doc isn\'t supported for AI analysis — '
+                                'please re-upload as PDF or DOCX to get a real resume score.';
+                            break;
+                          case ResumeExtractionStatus.tooShort:
+                            snackMessage = 'Uploaded, but we couldn\'t read much text from this file — '
+                                'if it\'s a scanned/image resume, try a text-based PDF instead.';
+                            break;
+                          case ResumeExtractionStatus.failed:
+                            snackMessage = 'Uploaded, but something went wrong reading this file\'s content.';
+                            break;
+                        }
+
+                        messenger.showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                            backgroundColor: colors.primaryPurple,
+                            content: Text(snackMessage, style: const TextStyle(color: Colors.white)),
+                          ),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        final messenger = ScaffoldMessenger.of(context);
+                        final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                            backgroundColor: colors.primaryPurple,
+                            content: Text('Failed to save file: $e', style: const TextStyle(color: Colors.white)),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  if (_resumePath != null && _resumePath!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceCard,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colors.borderColor),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                color: _successColor,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${_resumePath!.split(RegExp(r"[/\\]")).last} uploaded',
+                                  style: const TextStyle(
+                                    fontFamily: 'Be Vietnam Pro',
+                                    fontFamilyFallback: ['sans-serif'],
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: _successColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: const LinearProgressIndicator(
+                              value: 1.0,
+                              minHeight: 8,
+                              backgroundColor: Color(0xFFE4F5E8),
+                              valueColor: AlwaysStoppedAnimation<Color>(_successColor),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(999),
-                        child: const LinearProgressIndicator(
-                          value: 1.0,
-                          minHeight: 8,
-                          backgroundColor: Color(0xFFE4F5E8),
-                          valueColor: AlwaysStoppedAnimation<Color>(_successColor),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final userId = AuthService.instance.currentUserId;
+                        if (userId == null) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please log in before saving your profile')),
+                          );
+                          return;
+                        }
+
+                        final payload = {
+                          'name': _fullNameController.text.trim(),
+                          'degree': _degreeController.text.trim(),
+                          'college': _collegeController.text.trim(),
+                          'year_of_study': _selectedYear,
+                          'preferred_location': _preferredLocationController.text.trim(),
+                          'skills': _skills.join(', '),
+                          'career_goals': _careerGoalsController.text.trim(),
+                        };
+
+                        final updated = await DbService.instance.updateUserById(userId, payload);
+                        if (!context.mounted) return;
+                        if (updated > 0) {
+                          await _loadUser();
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Profile saved')),
+                          );
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context, true);
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Unable to save profile')),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.save_outlined),
+                      label: const Text(
+                        'Save Profile',
+                        style: TextStyle(
+                          fontFamily: 'Be Vietnam Pro',
+                          fontFamilyFallback: ['sans-serif'],
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final userId = AuthService.instance.currentUserId;
-                    if (userId == null) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please log in before saving your profile')),
-                      );
-                      return;
-                    }
-
-                    final payload = {
-                      'name': _fullNameController.text.trim(),
-                      'degree': _degreeController.text.trim(),
-                      'college': _collegeController.text.trim(),
-                      'year_of_study': _selectedYear,
-                      'preferred_location': _preferredLocationController.text.trim(),
-                      'skills': _skills.join(', '),
-                      'career_goals': _careerGoalsController.text.trim(),
-                    };
-
-                    debugPrint('[ProfileScreen] Save Profile tapped. Payload: $payload');
-                    debugPrint('[ProfileScreen] Pre-save avatar state -> _photoPath: $_photoPath, _photoBytes != null: ${_photoBytes != null}');
-
-                    final updated = await DbService.instance.updateUserById(userId, payload);
-                    final userAfterSave = await DbService.instance.getUserById(userId);
-                    debugPrint('[ProfileScreen] Post-save DB user record photo_path: ${userAfterSave?['photo_path']}');
-                    if (!context.mounted) return;
-                    if (updated > 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Profile saved')),
-                      );
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
-                          ),
-                        );
-                      }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Unable to save profile')),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text(
-                    'Save Profile',
-                    style: TextStyle(
-                      fontFamily: 'Be Vietnam Pro',
-                      fontFamilyFallback: ['sans-serif'],
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accentOrange,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accentOrange,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
+                  const SizedBox(height: 20),
+                ],
               ),
-              const SizedBox(height: 20),
+            ),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: colors.bottomNavBg,
+            selectedItemColor: colors.primaryPurple,
+            unselectedItemColor: colors.subtitleText,
+            selectedLabelStyle: const TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontWeight: FontWeight.w600,
+            ),
+            onTap: (index) {
+              if (index == 2) return;
+              setState(() {
+                _selectedIndex = index;
+              });
+              if (index == 0) {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context, true);
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
+                }
+              } else if (index == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ResumeAnalysisScreen(),
+                  ),
+                );
+              } else if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard_rounded),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.analytics_outlined),
+                activeIcon: Icon(Icons.analytics_rounded),
+                label: 'Analysis',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person_rounded),
+                label: 'Profile',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings_rounded),
+                label: 'Settings',
+              ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: _inactiveColor,
-        selectedLabelStyle: const TextStyle(
-          fontFamily: 'Be Vietnam Pro',
-          fontFamilyFallback: ['sans-serif'],
-          fontWeight: FontWeight.w700,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Be Vietnam Pro',
-          fontFamilyFallback: ['sans-serif'],
-          fontWeight: FontWeight.w600,
-        ),
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 0) {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomeScreen(),
-                ),
-              );
-            }
-          } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ResumeAnalysisScreen(),
-              ),
-            );
-          } else if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard_rounded),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            label: 'Analysis',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Settings',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -757,8 +804,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = await DbService.instance.getUserById(userId);
     if (user == null) return;
     if (!mounted) return;
-
-    debugPrint('[ProfileScreen] _loadUser -> loaded photo_path from DB: ${user['photo_path']}');
 
     final storedSkills = (user['skills'] as String?) ?? '';
     final parsedSkills = storedSkills.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
@@ -789,8 +834,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _photoPath != newPhoto ||
         _selectedYear != newYear) {
       setState(() {
-        final ts = DateTime.now().toIso8601String();
-        debugPrint('[$ts] [ProfileScreen] setState via _loadUser -> photo_path updated to: $newPhoto');
         _fullName = newName;
         _resumePath = newResume;
         _photoPath = newPhoto;
@@ -798,45 +841,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }
   }
-
-  InputDecoration _inputDecoration({
-    required String hintText,
-    required IconData icon,
-    required Color primaryColor,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: const TextStyle(
-        fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
-        fontSize: 15,
-        color: Color(0xFF9A9AA6),
-      ),
-      prefixIcon: Icon(icon, color: primaryColor),
-      filled: true,
-      fillColor: Theme.of(context).cardColor,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 18,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: isDark ? const Color(0xFF2C2C35) : const Color(0xFFD8D8E3)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: primaryColor, width: 1.4),
-      ),
-    );
-  }
 }
 
 class _FieldGroup extends StatelessWidget {
-  const _FieldGroup({required this.label, required this.child});
+  const _FieldGroup({
+    required this.label,
+    required this.child,
+    required this.labelColor,
+  });
 
   final String label;
   final Widget child;
+  final Color labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -850,7 +866,7 @@ class _FieldGroup extends StatelessWidget {
             fontFamilyFallback: const ['sans-serif'],
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: labelColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -862,22 +878,18 @@ class _FieldGroup extends StatelessWidget {
 
 class _UploadArea extends StatelessWidget {
   const _UploadArea({
-    required this.primaryColor,
+    required this.colors,
     required this.onChooseFile,
   });
 
-  final Color primaryColor;
+  final AppThemeColors colors;
   final VoidCallback onChooseFile;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = Theme.of(context).cardColor;
-    final iconBgColor = isDark ? const Color(0xFF2C2540) : const Color(0xFFF2EDFC);
-
     return CustomPaint(
       painter: _DashedBorderPainter(
-        color: isDark ? const Color(0xFF4A3E6B) : const Color(0xFFBFAEE6),
+        color: colors.borderColor,
         radius: 12,
         strokeWidth: 1.3,
         dashWidth: 8,
@@ -887,7 +899,7 @@ class _UploadArea extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: cardBg,
+          color: colors.surfaceCard,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -896,12 +908,12 @@ class _UploadArea extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: iconBgColor,
+                color: colors.chipBackground,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.upload_file_outlined,
-                color: primaryColor,
+                color: colors.primaryPurple,
                 size: 30,
               ),
             ),
@@ -914,18 +926,18 @@ class _UploadArea extends StatelessWidget {
                 fontFamilyFallback: const ['sans-serif'],
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colors.primaryText,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Drag & drop or browse your files. Max 5MB.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Be Vietnam Pro',
-                fontFamilyFallback: ['sans-serif'],
+                fontFamilyFallback: const ['sans-serif'],
                 fontSize: 13,
-                color: Color(0xFF6F6F7B),
+                color: colors.subtitleText,
               ),
             ),
             const SizedBox(height: 14),
@@ -934,7 +946,7 @@ class _UploadArea extends StatelessWidget {
               child: TextButton(
                 onPressed: onChooseFile,
                 style: TextButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: colors.primaryPurple,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),

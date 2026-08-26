@@ -156,33 +156,53 @@ class DbService {
   }
 
   Future<Map<String, dynamic>?> getUserById(int id) async {
+    Map<String, dynamic>? sqliteUser;
     try {
       final database = await db;
       final rows = await database.query('users', where: 'id=?', whereArgs: [id]);
-      if (rows.isNotEmpty) return rows.first;
+      if (rows.isNotEmpty) {
+        sqliteUser = Map<String, dynamic>.from(rows.first);
+      }
     } catch (e) {
       debugPrint('[DbService] getUserById SQLite error: $e');
     }
-    return await _getUserByIdWebFallback(id);
+
+    final webUser = await _getUserByIdWebFallback(id);
+
+    if (sqliteUser != null && webUser != null) {
+      final merged = Map<String, dynamic>.from(sqliteUser);
+      webUser.forEach((key, val) {
+        if (val != null && val.toString().trim().isNotEmpty) {
+          if (merged[key] == null || merged[key].toString().trim().isEmpty) {
+            merged[key] = val;
+          }
+        }
+      });
+      return merged;
+    }
+
+    return sqliteUser ?? webUser;
   }
 
   Future<int> updateUserById(int id, Map<String, dynamic> values) async {
-    int updatedCount = 0;
+    int sqliteUpdated = 0;
     try {
       final database = await db;
-      updatedCount = await database.update('users', values, where: 'id=?', whereArgs: [id]);
-      debugPrint('[DbService] updateUserById SQLite updated $updatedCount row(s) for user ID $id');
+      final existing = await database.query('users', where: 'id=?', whereArgs: [id]);
+      if (existing.isNotEmpty) {
+        sqliteUpdated = await database.update('users', values, where: 'id=?', whereArgs: [id]);
+        debugPrint('[DbService] updateUserById SQLite updated $sqliteUpdated row(s) for user ID $id');
+      } else {
+        sqliteUpdated = await database.insert('users', {'id': id, ...values});
+        debugPrint('[DbService] updateUserById SQLite inserted new row for user ID $id');
+      }
     } catch (e) {
       debugPrint('[DbService] updateUserById SQLite error: $e');
     }
 
-    if (kIsWeb) {
-      final fallbackCount = await _updateUserByIdWebFallback(id, values);
-      debugPrint('[DbService] updateUserById web fallback updated $fallbackCount row(s)');
-      return updatedCount > 0 ? updatedCount : fallbackCount;
-    }
-
-    return updatedCount;
+    final webUpdated = await _updateUserByIdWebFallback(id, values);
+    debugPrint('[DbService] updateUserById web fallback updated $webUpdated row(s)');
+    return sqliteUpdated > 0 ? sqliteUpdated : webUpdated;
   }
 
   Future<bool> userExists(String email, String password) async {

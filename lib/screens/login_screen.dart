@@ -269,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         );
 
                                         if (err != null) {
-                                          setState(() { _credentialError = 'Invalid Password'; });
+                                          setState(() { _credentialError = err; });
                                           return;
                                         }
 
@@ -404,19 +404,19 @@ class _LoginBackgroundPainter extends CustomPainter {
     canvas.drawPath(orangePath,orangePaint,);
 
     final orangeCirclePaint = Paint()
-      ..color = AppColors.accentOrange.withOpacity(0.15)
+      ..color = AppColors.accentOrange.withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle( Offset( size.width * 0.90,size.height * 0.18,),30,orangeCirclePaint,);
 
     final purpleCirclePaint = Paint()
-      ..color =AppColors.primaryPurple.withOpacity(0.07)
+      ..color =AppColors.primaryPurple.withValues(alpha: 0.07)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle( Offset(size.width * 0.08,size.height * 0.35,),22,purpleCirclePaint,);
 
     final dotPaint = Paint()
-      ..color = AppColors.accentOrange.withOpacity(0.20)
+      ..color = AppColors.accentOrange.withValues(alpha: 0.20)
       ..style = PaintingStyle.fill;
 
     const double dotRadius = 3;

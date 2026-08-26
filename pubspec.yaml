@@ -48,6 +48,7 @@ dependencies:
   archive: ^4.0.4
   xml: ^6.5.0
   flutter_markdown: ^0.7.7
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,9 @@ flutter:
   assets:
     - lib/data/
     - assets/images/
+    - assets/data/scholarships.json
+    - assets/data/programs.json
+    - assets/data/skill_roadmaps.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

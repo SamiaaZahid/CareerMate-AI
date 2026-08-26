@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-
 import 'constants/app_colors.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
@@ -23,6 +23,7 @@ void main() async {
 
   await AuthService.instance.init();
   await ThemeService.instance.init();
+
   runApp(const MyApp());
 }
 
@@ -38,6 +39,8 @@ class MyApp extends StatelessWidget {
           title: 'CareerMate AI',
           debugShowCheckedModeBanner: false,
           themeMode: ThemeService.instance.themeMode,
+
+          // LIGHT THEME
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
@@ -58,7 +61,8 @@ class MyApp extends StatelessWidget {
               foregroundColor: Colors.white,
               elevation: 0,
             ),
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            bottomNavigationBarTheme:
+                const BottomNavigationBarThemeData(
               backgroundColor: Colors.white,
               selectedItemColor: AppColors.primaryPurple,
               unselectedItemColor: Color(0xFF8B8B98),
@@ -79,6 +83,8 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
+
+          // DARK THEME
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
@@ -103,7 +109,8 @@ class MyApp extends StatelessWidget {
               foregroundColor: Colors.white,
               elevation: 0,
             ),
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            bottomNavigationBarTheme:
+                const BottomNavigationBarThemeData(
               backgroundColor: Color(0xFF1E1E26),
               selectedItemColor: Color(0xFFA582F7),
               unselectedItemColor: Color(0xFF8B8B98),
@@ -128,6 +135,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
+
           home: const LoginScreen(),
         );
       },
