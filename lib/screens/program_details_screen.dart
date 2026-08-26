@@ -2,147 +2,199 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
+import '../services/theme_service.dart';
 
-const Color kDetailsPrimaryColor = AppColors.primaryPurple;
-const Color kDetailsBackgroundColor = Color(0xFFF5F5F7);
-const Color kDetailsBorderColor = Color(0xFFE8E1F5);
-
-/// Displays full details for a single internship or scholarship
-/// recommendation, reached by tapping "View" on the Resume Analysis
-/// (program listing) screen.
-class ProgramDetailsScreen extends StatelessWidget {
+class ProgramDetailsScreen extends StatefulWidget {
   const ProgramDetailsScreen({super.key, required this.item});
 
   final RecommendationItemData item;
 
   @override
-  Widget build(BuildContext context) {
-    final bool isInternship = item.type == RecommendationType.internship;
+  State<ProgramDetailsScreen> createState() => _ProgramDetailsScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: kDetailsBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: kDetailsPrimaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          isInternship ? 'Internship Details' : 'Scholarship Details',
-          style: const TextStyle(
-            fontFamily: 'Be Vietnam Pro',
-            fontFamilyFallback: ['sans-serif'],
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _HeaderCard(item: item, isInternship: isInternship),
-              const SizedBox(height: 16),
-              _SectionCard(
-                title: 'About this ${isInternship ? 'Internship' : 'Scholarship'}',
-                child: Text(
-                  item.description,
-                  style: const TextStyle(
-                    fontFamily: 'Be Vietnam Pro',
-                    fontFamilyFallback: ['sans-serif'],
-                    fontSize: 14,
-                    height: 1.5,
-                    color: Color(0xFF5F5F6B),
-                  ),
-                ),
+class _ProgramDetailsScreenState extends State<ProgramDetailsScreen> {
+  bool _hasApplied = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isInternship = widget.item.type == RecommendationType.internship;
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService.instance.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final colors = ThemeService.instance.colors;
+        return Scaffold(
+          backgroundColor: colors.scaffoldBackground,
+          appBar: AppBar(
+            backgroundColor: colors.appBarBackground,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              isInternship ? 'Internship Details' : 'Scholarship Details',
+              style: const TextStyle(
+                fontFamily: 'Be Vietnam Pro',
+                fontFamilyFallback: ['sans-serif'],
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 16),
-              _SectionCard(
-                title: 'Requirements',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: item.requirements
-                      .map(
-                        (req) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.check_circle_outline,
-                                size: 18,
-                                color: kDetailsPrimaryColor,
+            ),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HeaderCard(
+                    item: widget.item,
+                    isInternship: isInternship,
+                    colors: colors,
+                  ),
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: 'About this ${isInternship ? 'Internship' : 'Scholarship'}',
+                    colors: colors,
+                    child: Text(
+                      widget.item.description,
+                      style: TextStyle(
+                        fontFamily: 'Be Vietnam Pro',
+                        fontFamilyFallback: const ['sans-serif'],
+                        fontSize: 14,
+                        height: 1.5,
+                        color: colors.subtitleText,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: 'Requirements',
+                    colors: colors,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: widget.item.requirements
+                          .map(
+                            (req) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_outline,
+                                    size: 18,
+                                    color: colors.primaryPurple,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      req,
+                                      style: TextStyle(
+                                        fontFamily: 'Be Vietnam Pro',
+                                        fontFamilyFallback: const ['sans-serif'],
+                                        fontSize: 14,
+                                        color: colors.subtitleText,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  req,
-                                  style: const TextStyle(
-                                    fontFamily: 'Be Vietnam Pro',
-                                    fontFamilyFallback: ['sans-serif'],
-                                    fontSize: 14,
-                                    color: Color(0xFF5F5F6B),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _hasApplied
+                          ? null
+                          : () {
+                              setState(() {
+                                _hasApplied = true;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: colors.primaryPurple,
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text(
+                                    'Application submitted for "${widget.item.title}"!',
+                                    style: const TextStyle(
+                                      fontFamily: 'Be Vietnam Pro',
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _hasApplied
+                            ? colors.chipBackground
+                            : AppColors.accentOrange,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: colors.chipBackground,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                      )
-                      .toList(),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Application flow for "${item.title}" coming soon'),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accentOrange,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      child: _hasApplied
+                          ? const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    color: Color(0xFF2FA84F), size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Applied ✓',
+                                  style: TextStyle(
+                                    fontFamily: 'Be Vietnam Pro',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2FA84F),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Text(
+                              'Apply Now',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontFamilyFallback: ['sans-serif'],
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
-                  child: const Text(
-                    'Apply Now',
-                    style: TextStyle(
-                      fontFamily: 'Be Vietnam Pro',
-                      fontFamilyFallback: ['sans-serif'],
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 class _HeaderCard extends StatelessWidget {
-  const _HeaderCard({required this.item, required this.isInternship});
+  const _HeaderCard({
+    required this.item,
+    required this.isInternship,
+    required this.colors,
+  });
 
   final RecommendationItemData item;
   final bool isInternship;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kDetailsBorderColor),
+        border: Border.all(color: colors.borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -157,7 +209,7 @@ class _HeaderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF2EDFC),
+              color: colors.chipBackground,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Row(
@@ -166,17 +218,17 @@ class _HeaderCard extends StatelessWidget {
                 Icon(
                   isInternship ? Icons.work_outline : Icons.school_outlined,
                   size: 16,
-                  color: kDetailsPrimaryColor,
+                  color: colors.primaryPurple,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   isInternship ? 'Internship' : 'Scholarship',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Be Vietnam Pro',
-                    fontFamilyFallback: ['sans-serif'],
+                    fontFamilyFallback: const ['sans-serif'],
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: kDetailsPrimaryColor,
+                    color: colors.primaryPurple,
                   ),
                 ),
               ],
@@ -185,22 +237,22 @@ class _HeaderCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             item.title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Be Vietnam Pro',
-              fontFamilyFallback: ['sans-serif'],
+              fontFamilyFallback: const ['sans-serif'],
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F1F28),
+              color: colors.primaryText,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             item.subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Be Vietnam Pro',
-              fontFamilyFallback: ['sans-serif'],
+              fontFamilyFallback: const ['sans-serif'],
               fontSize: 14,
-              color: Color(0xFF6F6F7B),
+              color: colors.subtitleText,
             ),
           ),
           if (item.location != null || item.deadline != null) ...[
@@ -210,9 +262,9 @@ class _HeaderCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 if (item.location != null)
-                  _MetaChip(icon: Icons.location_on_outlined, label: item.location!),
+                  _MetaChip(icon: Icons.location_on_outlined, label: item.location!, colors: colors),
                 if (item.deadline != null)
-                  _MetaChip(icon: Icons.event_outlined, label: item.deadline!),
+                  _MetaChip(icon: Icons.event_outlined, label: item.deadline!, colors: colors),
               ],
             ),
           ],
@@ -223,25 +275,30 @@ class _HeaderCard extends StatelessWidget {
 }
 
 class _MetaChip extends StatelessWidget {
-  const _MetaChip({required this.icon, required this.label});
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.colors,
+  });
 
   final IconData icon;
   final String label;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF8B8B98)),
+        Icon(icon, size: 16, color: colors.subtitleText),
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Be Vietnam Pro',
-            fontFamilyFallback: ['sans-serif'],
+            fontFamilyFallback: const ['sans-serif'],
             fontSize: 13,
-            color: Color(0xFF6F6F7B),
+            color: colors.subtitleText,
           ),
         ),
       ],
@@ -250,10 +307,15 @@ class _MetaChip extends StatelessWidget {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.child});
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    required this.colors,
+  });
 
   final String title;
   final Widget child;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -261,9 +323,9 @@ class _SectionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kDetailsBorderColor),
+        border: Border.all(color: colors.borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -277,12 +339,12 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Be Vietnam Pro',
-              fontFamilyFallback: ['sans-serif'],
+              fontFamilyFallback: const ['sans-serif'],
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F1F28),
+              color: colors.primaryText,
             ),
           ),
           const SizedBox(height: 12),

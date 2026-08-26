@@ -44,6 +44,7 @@ dependencies:
   url_launcher: ^6.2.5
   http: ^1.2.1
   web: ^1.0.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,9 @@ flutter:
   assets:
     - lib/data/internships.json
     - assets/images/
+    - assets/data/scholarships.json
+    - assets/data/programs.json
+    - assets/data/skill_roadmaps.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

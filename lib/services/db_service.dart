@@ -146,26 +146,50 @@ class DbService {
   }
 
   Future<Map<String, dynamic>?> getUserById(int id) async {
+    Map<String, dynamic>? sqliteUser;
     try {
       final database = await db;
       final rows = await database.query('users', where: 'id=?', whereArgs: [id]);
-      if (rows.isNotEmpty) return rows.first;
+      if (rows.isNotEmpty) {
+        sqliteUser = Map<String, dynamic>.from(rows.first);
+      }
     } catch (e) {
       debugPrint('[DbService] getUserById SQLite error: $e');
     }
-    return await _getUserByIdWebFallback(id);
+
+    final webUser = await _getUserByIdWebFallback(id);
+
+    if (sqliteUser != null && webUser != null) {
+      final merged = Map<String, dynamic>.from(sqliteUser);
+      webUser.forEach((key, val) {
+        if (val != null && val.toString().trim().isNotEmpty) {
+          if (merged[key] == null || merged[key].toString().trim().isEmpty) {
+            merged[key] = val;
+          }
+        }
+      });
+      return merged;
+    }
+
+    return sqliteUser ?? webUser;
   }
 
   Future<int> updateUserById(int id, Map<String, dynamic> values) async {
-    if (kIsWeb) {
-      return await _updateUserByIdWebFallback(id, values);
-    }
+    int sqliteUpdated = 0;
     try {
       final database = await db;
-      return await database.update('users', values, where: 'id=?', whereArgs: [id]);
+      final existing = await database.query('users', where: 'id=?', whereArgs: [id]);
+      if (existing.isNotEmpty) {
+        sqliteUpdated = await database.update('users', values, where: 'id=?', whereArgs: [id]);
+      } else {
+        sqliteUpdated = await database.insert('users', {'id': id, ...values});
+      }
     } catch (e) {
-      return 0;
+      debugPrint('[DbService] updateUserById SQLite error: $e');
     }
+
+    final webUpdated = await _updateUserByIdWebFallback(id, values);
+    return sqliteUpdated > 0 ? sqliteUpdated : webUpdated;
   }
 
   Future<bool> userExists(String email, String password) async {

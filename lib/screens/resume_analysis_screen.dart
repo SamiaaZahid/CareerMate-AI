@@ -2,26 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../models/recommendation_item.dart';
-import '../services/db_service.dart';
-import '../services/auth_service.dart';
 import '../constants/app_colors.dart';
+import '../models/recommendation_item.dart';
+import '../services/auth_service.dart';
+import '../services/db_service.dart';
+import '../services/theme_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'program_details_screen.dart';
 import 'settings_screen.dart';
-
-const Color kAnalysisBackgroundColor = Color(0xFFF5F5F7);
-const Color kAnalysisPrimaryColor = AppColors.primaryPurple;
-const Color kAnalysisBorderColor = Color(0xFFE8E1F5);
-const Color kAnalysisInactiveColor = Color(0xFF8B8B98);
-const TextStyle kAnalysisCardTitleStyle = TextStyle(
-  fontFamily: 'Be Vietnam Pro',
-  fontFamilyFallback: ['sans-serif'],
-  fontSize: 16,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF1F1F28),
-);
 
 class ResumeAnalysisScreen extends StatefulWidget {
   const ResumeAnalysisScreen({super.key});
@@ -32,6 +21,58 @@ class ResumeAnalysisScreen extends StatefulWidget {
 
 class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
   int _selectedIndex = 1;
+  bool _hasResume = false;
+  int _resumeScore = 0;
+  int _resumePts = 0;
+  int _skillsPts = 0;
+  int _skillsCount = 0;
+  int _eduPts = 0;
+  int _goalsPts = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserEvaluation();
+  }
+
+  Future<void> _loadUserEvaluation() async {
+    final userId = AuthService.instance.currentUserId;
+    if (userId == null) return;
+
+    final user = await DbService.instance.getUserById(userId);
+    if (user != null) {
+      final resumePath = (user['resume_path'] as String?)?.trim();
+      final hasResume = resumePath != null && resumePath.isNotEmpty;
+
+      final skillsStr = (user['skills'] as String?)?.trim() ?? '';
+      final skillsList = skillsStr.isEmpty
+          ? <String>[]
+          : skillsStr.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+
+      final degree = (user['degree'] as String?)?.trim() ?? '';
+      final college = (user['college'] as String?)?.trim() ?? '';
+      final goals = (user['career_goals'] as String?)?.trim() ?? '';
+
+      final resumePts = hasResume ? 30 : 0;
+      final skillsPts = (skillsList.length * 6).clamp(0, 30);
+      final eduPts = (degree.isNotEmpty ? 10 : 0) + (college.isNotEmpty ? 10 : 0);
+      final goalsPts = goals.isNotEmpty ? 20 : 0;
+
+      final totalScore = resumePts + skillsPts + eduPts + goalsPts;
+
+      if (mounted) {
+        setState(() {
+          _hasResume = hasResume;
+          _resumePts = resumePts;
+          _skillsPts = skillsPts;
+          _skillsCount = skillsList.length;
+          _eduPts = eduPts;
+          _goalsPts = goalsPts;
+          _resumeScore = totalScore;
+        });
+      }
+    }
+  }
 
   final List<String> _missingSkills = const [
     'AWS / Cloud Services',
@@ -39,7 +80,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
     'CI/CD Pipelines',
   ];
 
-final List<RecommendationItemData> _internships = const [
+  final List<RecommendationItemData> _internships = const [
     RecommendationItemData(
       type: RecommendationType.internship,
       title: 'Software Engineering Intern',
@@ -104,230 +145,414 @@ final List<RecommendationItemData> _internships = const [
     ),
   ];
 
-  TextStyle get _bodyStyle => const TextStyle(
-        fontFamily: 'Be Vietnam Pro',
-        fontFamilyFallback: ['sans-serif'],
-        fontSize: 14,
-        color: Color(0xFF6F6F7B),
-      );
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kAnalysisBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: kAnalysisPrimaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'CareerMate AI',
-          style: TextStyle(
-            fontFamily: 'Be Vietnam Pro',
-            fontFamilyFallback: ['sans-serif'],
-            fontWeight: FontWeight.bold,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService.instance.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final colors = ThemeService.instance.colors;
+        final bodyStyle = TextStyle(
+          fontFamily: 'Be Vietnam Pro',
+          fontFamilyFallback: const ['sans-serif'],
+          fontSize: 14,
+          color: colors.subtitleText,
+        );
+
+        return Scaffold(
+          backgroundColor: colors.scaffoldBackground,
+          appBar: AppBar(
+            backgroundColor: colors.appBarBackground,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            title: const Text(
+              'CareerMate AI',
+              style: TextStyle(
+                fontFamily: 'Be Vietnam Pro',
+                fontFamilyFallback: ['sans-serif'],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Center(
-                child: Text(
-                  'Resume Analysis',
-                  style: TextStyle(
-                    fontFamily: 'Be Vietnam Pro',
-                    fontFamilyFallback: ['sans-serif'],
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: kAnalysisPrimaryColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                    child: Column(
-                    children: [
-                      Text(
-                        'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
-                        textAlign: TextAlign.center,
-                        style: _bodyStyle,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Text(
+                      'Resume Analysis',
+                      style: TextStyle(
+                        fontFamily: 'Be Vietnam Pro',
+                        fontFamilyFallback: const ['sans-serif'],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: colors.primaryPurple,
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search jobs or keywords',
-                          prefixIcon: const Icon(Icons.search, color: AppColors.accentOrange),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
+                            textAlign: TextAlign.center,
+                            style: bodyStyle,
                           ),
-                        ),
-                        onSubmitted: (q) async {
-                          if (q.trim().isEmpty) return;
-                          final messenger = ScaffoldMessenger.of(context);
-                          final double snackLeft = MediaQuery.of(context).size.width * 0.5;
-                          final userId = AuthService.instance.currentUserId;
-                          if (userId == null) {
-                            messenger.showSnackBar(const SnackBar(content: Text('Please log in to save searches')));
-                            return;
-                          }
-                          await DbService.instance.addSearch(userId, q.trim());
-                          if (!context.mounted) return;
-                          messenger.showSnackBar(
-                            SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
-                              backgroundColor: kAnalysisPrimaryColor,
-                              content: Text('Saved search: $q', style: const TextStyle(color: Colors.white)),
+                          const SizedBox(height: 12),
+                          TextField(
+                            style: TextStyle(color: colors.primaryText),
+                            decoration: InputDecoration(
+                              hintText: 'Search jobs or keywords',
+                              hintStyle: TextStyle(color: colors.subtitleText),
+                              prefixIcon: const Icon(Icons.search, color: AppColors.accentOrange),
+                              filled: true,
+                              fillColor: colors.surfaceCard,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: colors.borderColor),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: colors.primaryPurple, width: 1.4),
+                              ),
                             ),
-                          );
-                        },
+                            onSubmitted: (q) async {
+                              if (q.trim().isEmpty) return;
+                              final messenger = ScaffoldMessenger.of(context);
+                              final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+                              final userId = AuthService.instance.currentUserId;
+                              if (userId == null) {
+                                messenger.showSnackBar(const SnackBar(content: Text('Please log in to save searches')));
+                                return;
+                              }
+                              await DbService.instance.addSearch(userId, q.trim());
+                              if (!context.mounted) return;
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
+                                  backgroundColor: colors.primaryPurple,
+                                  content: Text('Saved search: $q', style: const TextStyle(color: Colors.white)),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Center(
-                child: _ScoreRing(
-                  scoreText: '78 / 100',
-                  progress: 0.78,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: Text(
-                  'Resume Score',
-                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-              const SizedBox(height: 24),
-              const _BulletCard(
-                title: 'Strengths',
-                icon: Icons.check_circle_rounded,
-                iconColor: Color(0xFF2FA84F),
-                bullets: [
-                  'Strong project section with clear outcomes',
-                  'Relevant technical keywords already included',
-                  'Good structure and readable formatting',
+                  const SizedBox(height: 24),
+                  Center(
+                    child: _ScoreRing(
+                      scoreText: '$_resumeScore / 100',
+                      progress: _resumeScore / 100,
+                      colors: colors,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: Text(
+                      'Resume Score',
+                      style: bodyStyle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colors.primaryText,
+                      ),
+                    ),
+                  ),
+                  if (!_hasResume) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.chipBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colors.borderColor),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, color: AppColors.accentOrange),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'No resume uploaded yet. Upload a CV on your Profile page to boost your score by +30 points!',
+                              style: TextStyle(
+                                fontFamily: 'Be Vietnam Pro',
+                                fontSize: 13,
+                                color: colors.subtitleText,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildBreakdownCard(colors),
+                  const SizedBox(height: 24),
+                  _BulletCard(
+                    title: 'Strengths',
+                    icon: Icons.check_circle_rounded,
+                    iconColor: const Color(0xFF2FA84F),
+                    bullets: const [
+                      'Strong project section with clear outcomes',
+                      'Relevant technical keywords already included',
+                      'Good structure and readable formatting',
+                    ],
+                    bulletIcon: Icons.star_rounded,
+                    colors: colors,
+                  ),
+                  const SizedBox(height: 16),
+                  _BulletCard(
+                    title: 'Areas for Improvement',
+                    icon: Icons.warning_amber_rounded,
+                    iconColor: const Color(0xFFE08A1E),
+                    bullets: const [
+                      'Add more measurable achievements and metrics',
+                      'Highlight cloud and deployment experience',
+                      'Include collaboration and leadership examples',
+                    ],
+                    bulletIcon: Icons.arrow_right_alt_rounded,
+                    colors: colors,
+                  ),
+                  const SizedBox(height: 16),
+                  _SkillsSection(
+                    title: 'Missing Skills Detected',
+                    chips: _missingSkills,
+                    colors: colors,
+                  ),
+                  const SizedBox(height: 16),
+                  _RecommendationSection(
+                    title: 'Recommended Internships',
+                    icon: Icons.work_outline,
+                    items: _internships,
+                    colors: colors,
+                  ),
+                  const SizedBox(height: 16),
+                  _RecommendationSection(
+                    title: 'Recommended Scholarships',
+                    icon: Icons.school_outlined,
+                    items: _scholarships,
+                    colors: colors,
+                  ),
                 ],
-                bulletIcon: Icons.star_rounded,
               ),
-              const SizedBox(height: 16),
-              const _BulletCard(
-                title: 'Areas for Improvement',
-                icon: Icons.warning_amber_rounded,
-                iconColor: Color(0xFFE08A1E),
-                bullets: [
-                  'Add more measurable achievements and metrics',
-                  'Highlight cloud and deployment experience',
-                  'Include collaboration and leadership examples',
-                ],
-                bulletIcon: Icons.arrow_right_alt_rounded,
+            ),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: colors.bottomNavBg,
+            selectedItemColor: colors.primaryPurple,
+            unselectedItemColor: colors.subtitleText,
+            selectedLabelStyle: const TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontWeight: FontWeight.w600,
+            ),
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+              if (index == 0) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                );
+              } else if (index == 2) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              } else if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard_rounded),
+                label: 'Home',
               ),
-              const SizedBox(height: 16),
-              _SkillsSection(
-                title: 'Missing Skills Detected',
-                chips: _missingSkills,
+              BottomNavigationBarItem(
+                icon: Icon(Icons.analytics_outlined),
+                activeIcon: Icon(Icons.analytics_rounded),
+                label: 'Analysis',
               ),
-              const SizedBox(height: 16),
-              _RecommendationSection(
-                title: 'Recommended Internships',
-                icon: Icons.work_outline,
-                items: _internships,
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person_rounded),
+                label: 'Profile',
               ),
-              const SizedBox(height: 16),
-              _RecommendationSection(
-                title: 'Recommended Scholarships',
-                icon: Icons.school_outlined,
-                items: _scholarships,
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings_rounded),
+                label: 'Settings',
               ),
             ],
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBreakdownCard(AppThemeColors colors) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colors.surfaceCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: kAnalysisPrimaryColor,
-        unselectedItemColor: kAnalysisInactiveColor,
-        selectedLabelStyle: const TextStyle(
-          fontFamily: 'Be Vietnam Pro',
-          fontFamilyFallback: ['sans-serif'],
-          fontWeight: FontWeight.w700,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Be Vietnam Pro',
-          fontFamilyFallback: ['sans-serif'],
-          fontWeight: FontWeight.w600,
-        ),
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProfileScreen(),
-              ),
-            );
-          } else if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard_rounded),
-            label: 'Home',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Score Breakdown',
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: colors.primaryText,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics_outlined),
-            activeIcon: Icon(Icons.analytics_rounded),
-            label: 'Analysis',
+          const SizedBox(height: 14),
+          _breakdownRow(
+            icon: Icons.description_outlined,
+            title: 'Resume Uploaded',
+            subtitle: _hasResume ? 'CV attached' : 'No CV uploaded',
+            pointsText: '$_resumePts / 30 pts',
+            isFulfilled: _hasResume,
+            colors: colors,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
+          Divider(height: 20, color: colors.borderColor),
+          _breakdownRow(
+            icon: Icons.psychology_outlined,
+            title: 'Key Skills Listed',
+            subtitle: '$_skillsCount skills added',
+            pointsText: '$_skillsPts / 30 pts',
+            isFulfilled: _skillsPts > 0,
+            colors: colors,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: 'Settings',
+          Divider(height: 20, color: colors.borderColor),
+          _breakdownRow(
+            icon: Icons.school_outlined,
+            title: 'Education & Institution',
+            subtitle: 'Degree & College info',
+            pointsText: '$_eduPts / 20 pts',
+            isFulfilled: _eduPts > 0,
+            colors: colors,
+          ),
+          Divider(height: 20, color: colors.borderColor),
+          _breakdownRow(
+            icon: Icons.flag_outlined,
+            title: 'Career Goals',
+            subtitle: 'Defined in profile',
+            pointsText: '$_goalsPts / 20 pts',
+            isFulfilled: _goalsPts > 0,
+            colors: colors,
           ),
         ],
       ),
     );
   }
+
+  Widget _breakdownRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String pointsText,
+    required bool isFulfilled,
+    required AppThemeColors colors,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 22,
+          color: isFulfilled ? colors.primaryPurple : colors.subtitleText,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: colors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontSize: 12,
+                  color: colors.subtitleText,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: isFulfilled ? colors.chipBackground : colors.inputFillColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            pointsText,
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isFulfilled ? colors.primaryPurple : colors.subtitleText,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _ScoreRing extends StatelessWidget {
-  const _ScoreRing({required this.scoreText, required this.progress});
+  const _ScoreRing({
+    required this.scoreText,
+    required this.progress,
+    required this.colors,
+  });
 
   final String scoreText;
   final double progress;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -341,8 +566,8 @@ class _ScoreRing extends StatelessWidget {
             child: CustomPaint(
               painter: _RingPainter(
                 progress: progress,
-                backgroundColor: const Color(0xFFE8E1F6),
-                progressColor: kAnalysisPrimaryColor,
+                backgroundColor: colors.borderColor,
+                progressColor: colors.primaryPurple,
               ),
             ),
           ),
@@ -350,7 +575,7 @@ class _ScoreRing extends StatelessWidget {
             width: 140,
             height: 140,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surfaceCard,
               shape: BoxShape.circle,
               boxShadow: const [
                 BoxShadow(
@@ -363,12 +588,12 @@ class _ScoreRing extends StatelessWidget {
             child: Center(
               child: Text(
                 scoreText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Be Vietnam Pro',
-                  fontFamilyFallback: ['sans-serif'],
+                  fontFamilyFallback: const ['sans-serif'],
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: kAnalysisPrimaryColor,
+                  color: colors.primaryPurple,
                 ),
               ),
             ),
@@ -427,6 +652,7 @@ class _BulletCard extends StatelessWidget {
     required this.iconColor,
     required this.bullets,
     required this.bulletIcon,
+    required this.colors,
   });
 
   final String title;
@@ -434,15 +660,16 @@ class _BulletCard extends StatelessWidget {
   final Color iconColor;
   final List<String> bullets;
   final IconData bulletIcon;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: colors.borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -458,7 +685,17 @@ class _BulletCard extends StatelessWidget {
             children: [
               Icon(icon, color: iconColor, size: 22),
               const SizedBox(width: 8),
-              Expanded(child: Text(title, style: kAnalysisCardTitleStyle)),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Be Vietnam Pro',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primaryText,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -471,17 +708,17 @@ class _BulletCard extends StatelessWidget {
                   Icon(
                     bulletIcon,
                     size: 18,
-                    color: kAnalysisPrimaryColor,
+                    color: colors.primaryPurple,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       bullet,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 14,
-                        color: Color(0xFF5F5F6B),
+                        color: colors.subtitleText,
                       ),
                     ),
                   ),
@@ -496,19 +733,24 @@ class _BulletCard extends StatelessWidget {
 }
 
 class _SkillsSection extends StatelessWidget {
-  const _SkillsSection({required this.title, required this.chips});
+  const _SkillsSection({
+    required this.title,
+    required this.chips,
+    required this.colors,
+  });
 
   final String title;
   final List<String> chips;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: colors.borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -520,7 +762,15 @@ class _SkillsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: kAnalysisCardTitleStyle),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: colors.primaryText,
+            ),
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
@@ -533,18 +783,18 @@ class _SkillsSection extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2EDFC),
+                      color: colors.chipBackground,
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: kAnalysisBorderColor),
+                      border: Border.all(color: colors.borderColor),
                     ),
                     child: Text(
                       chip,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: kAnalysisPrimaryColor,
+                        color: colors.primaryPurple,
                       ),
                     ),
                   ),
@@ -562,20 +812,22 @@ class _RecommendationSection extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.items,
+    required this.colors,
   });
 
   final String title;
   final IconData icon;
   final List<RecommendationItemData> items;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kAnalysisBorderColor),
+        border: Border.all(color: colors.borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
@@ -589,9 +841,17 @@ class _RecommendationSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: kAnalysisPrimaryColor, size: 22),
+              Icon(icon, color: colors.primaryPurple, size: 22),
               const SizedBox(width: 8),
-              Text(title, style: kAnalysisCardTitleStyle),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: colors.primaryText,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -601,31 +861,31 @@ class _RecommendationSection extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDFDFF),
+                  color: colors.chipBackground,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE9E4F7)),
+                  border: Border.all(color: colors.borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       item.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F1F28),
+                        color: colors.primaryText,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Be Vietnam Pro',
-                        fontFamilyFallback: ['sans-serif'],
+                        fontFamilyFallback: const ['sans-serif'],
                         fontSize: 13,
-                        color: Color(0xFF6F6F7B),
+                        color: colors.subtitleText,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -650,7 +910,7 @@ class _RecommendationSection extends StatelessWidget {
                           ),
                         ),
                         child: const Text(
-                          'View',
+                          'View Details',
                           style: TextStyle(
                             fontFamily: 'Be Vietnam Pro',
                             fontFamilyFallback: ['sans-serif'],

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "sch_01",
+    "title": "STEM Future Leaders Scholarship",
+    "provider": "Tech Forward Foundation",
+    "amount": "$5,000",
+    "deadline": "15 Oct 2026",
+    "shortDescription": "Awarded to high-achieving undergraduate students pursuing degrees in Computer Science, Engineering, or Mathematics.",
+    "fullDescription": "The STEM Future Leaders Scholarship recognizes outstanding undergraduate students committed to advancing technology and innovation. Recipients receive financial assistance as well as mentorship opportunities with senior software engineers and industry researchers.",
+    "eligibility": "Currently enrolled in a full-time STEM undergraduate degree program with a minimum cumulative GPA of 3.4 on a 4.0 scale. Requires academic transcripts and one recommendation letter.",
+    "icon": "school"
+  },
+  {
+    "id": "sch_02",
+    "title": "Global Tech Women Innovation Grant",
+    "provider": "Women in Tech Alliance",
+    "amount": "$7,500",
+    "deadline": "01 Nov 2026",
+    "shortDescription": "Supports female students building groundbreaking technical projects, open-source software, or AI research.",
+    "fullDescription": "Designed to empower underrepresented female technologists, this grant offers direct financial support, technical workshop invitations, and annual conference passes to help recipients launch impactful technology initiatives.",
+    "eligibility": "Open to women pursuing undergraduate or graduate degrees in Computer Science, Data Science, or Software Engineering. Project portfolio or GitHub profile required.",
+    "icon": "workspace_premium"
+  },
+  {
+    "id": "sch_03",
+    "title": "AI & Data Science Research Fellowship",
+    "provider": "Deep Data Institute",
+    "amount": "$10,000",
+    "deadline": "20 Nov 2026",
+    "shortDescription": "Provides funding and computational resources for students conducting applied machine learning and data research.",
+    "fullDescription": "The Deep Data Institute Fellowship supports students exploring novel machine learning architectures, natural language processing, or computer vision applications. Fellowship includes access to cloud GPU compute credits.",
+    "eligibility": "Undergraduate seniors or graduate students with coursework or research experience in Python, PyTorch/TensorFlow, and Machine Learning. Requires a 2-page project proposal.",
+    "icon": "auto_awesome"
+  },
+  {
+    "id": "sch_04",
+    "title": "Open Source Developer Grant",
+    "provider": "Code Open Foundation",
+    "amount": "$3,000",
+    "deadline": "05 Dec 2026",
+    "shortDescription": "Direct financial award for student developers making active contributions to major open-source repositories.",
+    "fullDescription": "This grant rewards students who actively contribute to open-source developer tools, SDKs, or libraries. Awardees receive funding to assist with educational expenses and project hosting costs.",
+    "eligibility": "Enrolled in any accredited higher education program with at least 3 merged pull requests in recognized open-source GitHub/GitLab repositories within the past 12 months.",
+    "icon": "code"
+  },
+  {
+    "id": "sch_05",
+    "title": "National Merit Academic Excellence Award",
+    "provider": "Higher Ed Opportunity Fund",
+    "amount": "$6,000",
+    "deadline": "15 Dec 2026",
+    "shortDescription": "Need and merit-based financial aid package for exceptional university students demonstrating civic leadership.",
+    "fullDescription": "The National Merit Academic Excellence Award assists high-achieving students across all academic disciplines who display leadership in university clubs, community service, or student government.",
+    "eligibility": "Full-time student maintaining a 3.5+ GPA with documented community involvement or university extracurricular leadership role.",
+    "icon": "star"
+  },
+  {
+    "id": "sch_06",
+    "title": "NextGen Cybersecurity Scholar Award",
+    "provider": "Cyber Guard Security Network",
+    "amount": "$4,500",
+    "deadline": "10 Jan 2027",
+    "shortDescription": "Scholarship dedicated to aspiring security researchers, ethical hackers, and information defense specialists.",
+    "fullDescription": "Aimed at encouraging cybersecurity talent, this award provides financial support alongside free enrollment in industry certification preparatory bootcamps (e.g. Security+, CEH).",
+    "eligibility": "Students pursuing degrees in Cybersecurity, Information Technology, or Computer Science with demonstrated interest in network defense or ethical hacking.",
+    "icon": "security"
+  }
+]

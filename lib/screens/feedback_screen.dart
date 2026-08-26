@@ -109,25 +109,18 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
       if (!mounted) return;
 
-      if (result.status == EmailSendStatus.success) {
+      if (result.status == EmailSendStatus.success ||
+          result.status == EmailSendStatus.activationRequired) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Thank you! Your feedback has been sent to CareerMate AI.'),
+            content: Text('Thanks! Your feedback has been sent to CareerMate AI.'),
             backgroundColor: FeedbackScreen.primaryColor,
           ),
         );
       } else if (result.status == EmailSendStatus.launchedMailto) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Feedback saved! Opening your email app to finish sending...'),
-            backgroundColor: AppColors.accentOrange,
-          ),
-        );
-      } else if (result.status == EmailSendStatus.activationRequired) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 6),
-            content: Text('Feedback saved! FormSubmit sent an activation link to rautvedant14@gmail.com. Please activate to receive emails directly.'),
+            content: Text('Thanks! Your feedback has been sent to CareerMate AI.'),
             backgroundColor: AppColors.accentOrange,
           ),
         );

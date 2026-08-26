@@ -14,6 +14,7 @@ class RecommendationItemData {
     required this.requirements,
     this.location,
     this.deadline,
+    this.skills = const [],
   });
 
   final RecommendationType type;
@@ -28,4 +29,29 @@ class RecommendationItemData {
 
   final String? location;
   final String? deadline;
-}
+
+  /// Skill keywords associated with this program.
+  final List<String> skills;
+
+  factory RecommendationItemData.fromJson(Map<String, dynamic> json) {
+    final typeStr = (json['type'] as String?)?.toLowerCase() ?? 'internship';
+    return RecommendationItemData(
+      type: typeStr == 'scholarship'
+          ? RecommendationType.scholarship
+          : RecommendationType.internship,
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      requirements: (json['requirements'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      location: json['location'] as String?,
+      deadline: json['deadline'] as String?,
+      skills: (json['skills'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+    );
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "roadmaps": [
+    {
+      "id": "data_analyst",
+      "role": "Data Analyst",
+      "aliases": ["data analysis", "data analyst", "data analytics", "data science"],
+      "description": "Master data querying, statistical modeling, visualization, and business intelligence.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "Excel",
+          "description": "Spreadsheet fundamentals, formulas, VLOOKUP/XLOOKUP, and pivot tables.",
+          "resource": "Suggested: Excel Skills for Business (Coursera)"
+        },
+        {
+          "stepNumber": 2,
+          "title": "SQL",
+          "description": "Querying and managing relational databases with SELECT, JOINs, and aggregations.",
+          "resource": "Suggested: Practice on LeetCode & HackerRank SQL"
+        },
+        {
+          "stepNumber": 3,
+          "title": "Python",
+          "description": "Data manipulation and wrangling with pandas, NumPy, and Jupyter Notebooks.",
+          "resource": "Suggested: Kaggle Pandas Tutorials & NumPy Guides"
+        },
+        {
+          "stepNumber": 4,
+          "title": "Statistics",
+          "description": "Core statistical concepts, probability distributions, and hypothesis testing.",
+          "resource": "Suggested: Khan Academy Statistics & Probability"
+        },
+        {
+          "stepNumber": 5,
+          "title": "Data Visualization",
+          "description": "Building interactive dashboards with Tableau, Power BI, or Matplotlib.",
+          "resource": "Suggested: Build a Tableau Public sample dashboard"
+        },
+        {
+          "stepNumber": 6,
+          "title": "Projects",
+          "description": "Build 2-3 end-to-end portfolio data analysis projects on GitHub.",
+          "resource": "Suggested: Exploratory Data Analysis project on GitHub"
+        },
+        {
+          "stepNumber": 7,
+          "title": "Interview Preparation",
+          "description": "Practice live SQL problem solving, case studies, and business analytics questions.",
+          "resource": "Suggested: Mock technical interviews & case study walkthroughs"
+        }
+      ]
+    },
+    {
+      "id": "full_stack_developer",
+      "role": "Full Stack Developer",
+      "aliases": ["full stack", "fullstack", "full stack dev", "software engineer", "web developer", "developer"],
+      "description": "Build complete modern web applications from responsive frontends to scalable backends.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "HTML/CSS",
+          "description": "Web structure, modern CSS flexbox/grid layout, responsive design, and accessibility.",
+          "resource": "Suggested: freeCodeCamp Responsive Web Design"
+        },
+        {
+          "stepNumber": 2,
+          "title": "JavaScript",
+          "description": "Core JS ES6+, async/await, DOM manipulation, and fetch API.",
+          "resource": "Suggested: JavaScript.info & Eloquent JavaScript"
+        },
+        {
+          "stepNumber": 3,
+          "title": "Frontend Framework",
+          "description": "Master React, Flutter, or Vue for component-driven interactive interfaces.",
+          "resource": "Suggested: React Official Documentation & Scrimba"
+        },
+        {
+          "stepNumber": 4,
+          "title": "Backend Basics",
+          "description": "Server creation and middleware logic with Node.js, Express, or Python.",
+          "resource": "Suggested: Node.js & Express Crash Course"
+        },
+        {
+          "stepNumber": 5,
+          "title": "Databases",
+          "description": "Relational (PostgreSQL/SQL) and NoSQL (MongoDB) data modeling.",
+          "resource": "Suggested: MongoDB University & PostgreSQL Tutorial"
+        },
+        {
+          "stepNumber": 6,
+          "title": "REST APIs",
+          "description": "Designing, building, testing, and securing RESTful web APIs and auth.",
+          "resource": "Suggested: Postman API Fundamentals Student Expert"
+        },
+        {
+          "stepNumber": 7,
+          "title": "Deployment & Git",
+          "description": "Version control with Git/GitHub, CI/CD, and hosting on Vercel or Render.",
+          "resource": "Suggested: Git & GitHub Interactive Guide"
+        },
+        {
+          "stepNumber": 8,
+          "title": "Projects",
+          "description": "Build 2-3 full stack web or mobile applications with user authentication.",
+          "resource": "Suggested: Full Stack E-commerce or Social App on GitHub"
+        },
+        {
+          "stepNumber": 9,
+          "title": "Interview Preparation",
+          "description": "Data structures, algorithm practice on LeetCode, and system design basics.",
+          "resource": "Suggested: NeetCode 150 & System Design Primer"
+        }
+      ]
+    },
+    {
+      "id": "ui_ux_designer",
+      "role": "UI/UX Designer",
+      "aliases": ["ui/ux", "ux designer", "ui designer", "product designer", "design", "ux design"],
+      "description": "Craft intuitive user experiences, beautiful visual interfaces, and design systems.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "Design Fundamentals",
+          "description": "Color theory, typography, visual hierarchy, grid systems, and layout principles.",
+          "resource": "Suggested: Refactoring UI & Interaction Design Foundation"
+        },
+        {
+          "stepNumber": 2,
+          "title": "Figma",
+          "description": "Master Figma tools, auto-layout, variants, components, and design tokens.",
+          "resource": "Suggested: Figma Official YouTube Tutorials"
+        },
+        {
+          "stepNumber": 3,
+          "title": "Wireframing",
+          "description": "Low-fidelity wireframes, user flow mapping, and information architecture.",
+          "resource": "Suggested: Balsamiq & Figma Wireframe Kits"
+        },
+        {
+          "stepNumber": 4,
+          "title": "Prototyping",
+          "description": "Interactive prototypes, micro-animations, and transition flows.",
+          "resource": "Suggested: Figma Advanced Prototyping Workshop"
+        },
+        {
+          "stepNumber": 5,
+          "title": "User Research Basics",
+          "description": "User personas, interviews, usability testing, and journey mapping.",
+          "resource": "Suggested: NN/g UX Research Methodologies"
+        },
+        {
+          "stepNumber": 6,
+          "title": "Design Systems",
+          "description": "Building component libraries, documentation, and design tokens.",
+          "resource": "Suggested: Material Design 3 & Apple HIG Guidelines"
+        },
+        {
+          "stepNumber": 7,
+          "title": "Portfolio Projects",
+          "description": "Build 2 comprehensive end-to-end UX case studies.",
+          "resource": "Suggested: Publish Case Studies on Behance or Notion"
+        },
+        {
+          "stepNumber": 8,
+          "title": "Interview Preparation",
+          "description": "Design challenge walkthroughs, whiteboard exercises, and portfolio presentation.",
+          "resource": "Suggested: Articulating Design Decisions Practice"
+        }
+      ]
+    },
+    {
+      "id": "digital_marketer",
+      "role": "Digital Marketer",
+      "aliases": ["digital marketer", "marketing", "digital marketing", "seo specialist", "growth marketer"],
+      "description": "Drive customer acquisition, SEO, social strategy, and performance marketing.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "Marketing Fundamentals",
+          "description": "Target audience segmentation, brand positioning, and conversion funnels.",
+          "resource": "Suggested: HubSpot Digital Marketing Certification"
+        },
+        {
+          "stepNumber": 2,
+          "title": "Content Creation",
+          "description": "Persuasive copywriting, visual graphics, and video scripting.",
+          "resource": "Suggested: Copywriting Course & Canva Masterclass"
+        },
+        {
+          "stepNumber": 3,
+          "title": "SEO & SEM",
+          "description": "Keyword research, on-page SEO, Google Search Console, and Google Ads.",
+          "resource": "Suggested: Google Search Ads Certification"
+        },
+        {
+          "stepNumber": 4,
+          "title": "Social Media Marketing",
+          "description": "Content calendars and organic strategy for LinkedIn, Instagram, and X.",
+          "resource": "Suggested: Meta Social Media Marketing Certificate"
+        },
+        {
+          "stepNumber": 5,
+          "title": "Analytics & Reporting",
+          "description": "Google Analytics 4 (GA4), tracking conversions, and A/B testing.",
+          "resource": "Suggested: Google Analytics 4 Skillshop Certification"
+        },
+        {
+          "stepNumber": 6,
+          "title": "Email Marketing",
+          "description": "Lead magnet creation, automated email drips, and newsletter campaigns.",
+          "resource": "Suggested: Mailchimp or ConvertKit Academy"
+        },
+        {
+          "stepNumber": 7,
+          "title": "Portfolio & Strategy",
+          "description": "Execute a live marketing campaign and compile performance metrics.",
+          "resource": "Suggested: Campaign Performance Case Study PDF"
+        },
+        {
+          "stepNumber": 8,
+          "title": "Interview Preparation",
+          "description": "Pitching marketing strategy decks and explaining ROI metrics.",
+          "resource": "Suggested: Growth Marketing Interview Case Prep"
+        }
+      ]
+    },
+    {
+      "id": "product_manager",
+      "role": "Product Manager",
+      "aliases": ["product manager", "pm", "product management", "product owner"],
+      "description": "Lead product vision, feature prioritization, agile execution, and cross-functional teams.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "title": "Product Fundamentals",
+          "description": "Product lifecycle, vision, roadmap planning, and value propositions.",
+          "resource": "Suggested: Inspired by Marty Cagan"
+        },
+        {
+          "stepNumber": 2,
+          "title": "User Research",
+          "description": "Customer discovery interviews, surveys, and problem validation.",
+          "resource": "Suggested: The Mom Test by Rob Fitzpatrick"
+        },
+        {
+          "stepNumber": 3,
+          "title": "Agile & Scrum",
+          "description": "Sprint planning, writing user stories, and managing backlogs in Jira.",
+          "resource": "Suggested: Professional Scrum Product Owner (PSPO)"
+        },
+        {
+          "stepNumber": 4,
+          "title": "Data & Metrics",
+          "description": "Tracking North Star metrics, retention funnels, and SQL analytics.",
+          "resource": "Suggested: Amplitude & Mixpanel Analytics Academy"
+        },
+        {
+          "stepNumber": 5,
+          "title": "Spec Writing & Wireframing",
+          "description": "Writing Product Requirement Documents (PRDs) and sketching flows.",
+          "resource": "Suggested: PRD Templates & Balsamiq"
+        },
+        {
+          "stepNumber": 6,
+          "title": "Go-To-Market Strategy",
+          "description": "Product launch strategies, feature positioning, and release notes.",
+          "resource": "Suggested: Product-Led Growth Playbook"
+        },
+        {
+          "stepNumber": 7,
+          "title": "Case Studies & Portfolio",
+          "description": "Create 2 detailed product teardowns or PRD case studies.",
+          "resource": "Suggested: Publish PRD teardown on Medium or Substack"
+        },
+        {
+          "stepNumber": 8,
+          "title": "Interview Preparation",
+          "description": "Product sense questions, estimation, and execution metrics interviews.",
+          "resource": "Suggested: Cracking the PM Interview & Exponent"
+        }
+      ]
+    }
+  ]
+}

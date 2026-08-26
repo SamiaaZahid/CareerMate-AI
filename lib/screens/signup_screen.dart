@@ -185,7 +185,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -499,7 +499,7 @@ class _SignupBackgroundPainter extends CustomPainter {
     canvas.drawPath( orangePath, orangePaint,);
 
     final orangeCirclePaint = Paint()
-      ..color = AppColors.accentOrange.withOpacity(0.15)
+      ..color = AppColors.accentOrange.withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(
@@ -508,7 +508,7 @@ class _SignupBackgroundPainter extends CustomPainter {
     );
 
     final purpleCirclePaint = Paint()
-      ..color = AppColors.primaryPurple.withOpacity(0.07)
+      ..color = AppColors.primaryPurple.withValues(alpha: 0.07)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(
@@ -517,7 +517,7 @@ class _SignupBackgroundPainter extends CustomPainter {
     );
 
     final dotPaint = Paint()
-      ..color = AppColors.accentOrange.withOpacity(0.20)
+      ..color = AppColors.accentOrange.withValues(alpha: 0.20)
       ..style = PaintingStyle.fill;
 
     const double dotRadius = 3;
