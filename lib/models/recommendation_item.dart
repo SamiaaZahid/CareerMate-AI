@@ -1,3 +1,5 @@
+import 'scholarship_model.dart';
+
 /// Type of recommendation being shown to the student.
 enum RecommendationType { internship, scholarship }
 
@@ -54,4 +56,31 @@ class RecommendationItemData {
           const [],
     );
   }
-}
+
+  /// Converts a [Scholarship] (from scholarships.json, the single source of
+  /// truth for the dedicated Scholarships tab) into the shared display
+  /// model used by Resume Analysis and Program Listing. This is what keeps
+  /// a scholarship's name/details identical no matter which screen shows
+  /// it — no second, drifting copy of scholarship data anywhere else.
+  factory RecommendationItemData.fromScholarship(Scholarship scholarship) {
+    final eligibilityText = scholarship.eligibility.trim();
+    final requirements = eligibilityText.isEmpty
+        ? const <String>[]
+        : eligibilityText
+            .split(RegExp(r'[.;\n]'))
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+
+    return RecommendationItemData(
+      type: RecommendationType.scholarship,
+      title: scholarship.title,
+      subtitle: '${scholarship.provider} · ${scholarship.amount}',
+      description: scholarship.shortDescription.isNotEmpty
+          ? scholarship.shortDescription
+          : scholarship.fullDescription,
+      requirements: requirements,
+      deadline: scholarship.deadline,
+    );
+  }
+}

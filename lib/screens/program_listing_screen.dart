@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
+import '../services/scholarship_service.dart';
 import '../services/theme_service.dart';
 import 'program_details_screen.dart';
 
@@ -23,81 +27,52 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  final List<RecommendationItemData> _allPrograms = const [
-    RecommendationItemData(
-      type: RecommendationType.internship,
-      title: 'Software Engineering Intern',
-      subtitle: 'Google - Jun 2026 to Aug 2026',
-      description:
-          'Work alongside senior engineers on production systems, contribute to code reviews, and ship small features end-to-end during a 10-week summer internship.',
-      requirements: [
-        'Currently pursuing a degree in Computer Science or related field',
-        'Comfortable with at least one OOP language (Java, Python, C++)',
-        'Strong problem-solving and communication skills',
-      ],
-      location: 'Mountain View, CA (Hybrid)',
-      deadline: 'Applications close 15 Sep 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.internship,
-      title: 'Frontend Developer Intern',
-      subtitle: 'Notion - Jul 2026 to Sep 2026',
-      description:
-          'Help build delightful, accessible UI components used by millions of users, working closely with design and product teams.',
-      requirements: [
-        'Experience with React or Flutter framework',
-        'Eye for detail in UI/UX implementation',
-        'Portfolio or GitHub with frontend projects',
-      ],
-      location: 'Remote',
-      deadline: 'Applications close 20 Sep 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.internship,
-      title: 'AI / Data Science Intern',
-      subtitle: 'Microsoft - May 2026 to Aug 2026',
-      description:
-          'Contribute to building predictive algorithms, modern neural network pipelines, and automated dataset evaluations.',
-      requirements: [
-        'Proficiency in Python and PyTorch/TensorFlow',
-        'Solid background in Machine Learning concepts',
-        'Strong mathematical foundation',
-      ],
-      location: 'Redmond, WA',
-      deadline: 'Applications close 05 Oct 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.scholarship,
-      title: 'STEM Excellence Scholarship',
-      subtitle: '\$800 - Deadline: 30 Sep 2026',
-      description:
-          'Awarded to students demonstrating strong academic performance and active involvement in STEM projects or research.',
-      requirements: [
-        'Minimum GPA of 3.3 or equivalent',
-        'Enrolled in a STEM undergraduate program',
-        'One recommendation letter from a faculty member',
-      ],
-      deadline: '30 Sep 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.scholarship,
-      title: 'Future Builders Tech Grant',
-      subtitle: '\$600 - Deadline: 12 Oct 2026',
-      description:
-          'Supports students building independent technical projects or open-source software alongside their studies.',
-      requirements: [
-        'Submit a short project proposal or existing project link',
-        'Currently enrolled in an accredited institution',
-        'Open to all fields of study',
-      ],
-      deadline: '12 Oct 2026',
-    ),
-  ];
+  List<RecommendationItemData> _allPrograms = [];
+  bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
     _selectedFilter = widget.initialFilter;
+    _loadPrograms();
+  }
+
+  /// Loads internships from programs.json and scholarships from
+  /// scholarships.json (the same dataset behind the dedicated Scholarships
+  /// tab), then merges them. Two separate files because they're two
+  /// separate features with different detail screens — but both are now
+  /// real, and a scholarship shown here is always identical to the one
+  /// shown in the Scholarships tab, never a second drifting copy.
+  Future<void> _loadPrograms() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final jsonString = await rootBundle.loadString('assets/data/programs.json');
+      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
+      final internships = jsonList
+          .map((e) => RecommendationItemData.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final scholarships = await ScholarshipService().fetchScholarships();
+      final scholarshipItems =
+          scholarships.map((s) => RecommendationItemData.fromScholarship(s)).toList();
+
+      if (!mounted) return;
+      setState(() {
+        _allPrograms = [...internships, ...scholarshipItems];
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('[ProgramListingScreen] Failed to load programs: $e');
+      if (!mounted) return;
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -227,7 +202,35 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
                   ),
                 ),
                 Expanded(
-                  child: _filteredPrograms.isEmpty
+                  child: _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(color: colors.primaryPurple),
+                        )
+                      : _hasError
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.error_outline_rounded, size: 48, color: colors.subtitleText),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Couldn\'t load opportunities',
+                                    style: TextStyle(
+                                      fontFamily: 'Be Vietnam Pro',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: colors.primaryText,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  TextButton(
+                                    onPressed: _loadPrograms,
+                                    child: const Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : _filteredPrograms.isEmpty
                       ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

@@ -11,7 +11,14 @@
     ],
     "location": "Mountain View, CA (Hybrid)",
     "deadline": "15 Sep 2026",
-    "skills": ["Java", "Python", "C++", "Software Engineering", "OOP", "Data Analysis"]
+    "skills": [
+      "Java",
+      "Python",
+      "C++",
+      "Software Engineering",
+      "OOP",
+      "Data Analysis"
+    ]
   },
   {
     "type": "internship",
@@ -25,7 +32,14 @@
     ],
     "location": "Remote",
     "deadline": "20 Sep 2026",
-    "skills": ["React", "Flutter", "UX Design", "HTML", "CSS", "JavaScript"]
+    "skills": [
+      "React",
+      "Flutter",
+      "UX Design",
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ]
   },
   {
     "type": "internship",
@@ -39,7 +53,14 @@
     ],
     "location": "Bangalore, India (Hybrid)",
     "deadline": "25 Sep 2026",
-    "skills": ["Flutter", "Dart", "Kotlin", "Swift", "UX Design", "Mobile Development"]
+    "skills": [
+      "Flutter",
+      "Dart",
+      "Kotlin",
+      "Swift",
+      "UX Design",
+      "Mobile Development"
+    ]
   },
   {
     "type": "internship",
@@ -53,7 +74,13 @@
     ],
     "location": "Hyderabad, India",
     "deadline": "30 Sep 2026",
-    "skills": ["Data Analysis", "Python", "SQL", "Excel", "Analytics"]
+    "skills": [
+      "Data Analysis",
+      "Python",
+      "SQL",
+      "Excel",
+      "Analytics"
+    ]
   },
   {
     "type": "internship",
@@ -67,7 +94,13 @@
     ],
     "location": "Chennai, India (Hybrid)",
     "deadline": "5 Oct 2026",
-    "skills": ["Cloud Services", "AWS", "Linux", "Python", "Cloud"]
+    "skills": [
+      "Cloud Services",
+      "AWS",
+      "Linux",
+      "Python",
+      "Cloud"
+    ]
   },
   {
     "type": "internship",
@@ -81,7 +114,12 @@
     ],
     "location": "Bangalore, India",
     "deadline": "10 Oct 2026",
-    "skills": ["Cybersecurity", "Linux", "Networks", "Security"]
+    "skills": [
+      "Cybersecurity",
+      "Linux",
+      "Networks",
+      "Security"
+    ]
   },
   {
     "type": "internship",
@@ -95,7 +133,12 @@
     ],
     "location": "Pune, India (Hybrid)",
     "deadline": "18 Oct 2026",
-    "skills": ["Business Process", "Project Management", "Data Analysis", "Workflows"]
+    "skills": [
+      "Business Process",
+      "Project Management",
+      "Data Analysis",
+      "Workflows"
+    ]
   },
   {
     "type": "internship",
@@ -109,86 +152,12 @@
     ],
     "location": "Sydney, Australia (Hybrid)",
     "deadline": "25 Oct 2026",
-    "skills": ["Product Management", "UX Design", "Data Analysis", "Product"]
-  },
-  {
-    "type": "scholarship",
-    "title": "STEM Excellence Scholarship",
-    "subtitle": "$800 - Deadline: 30 Sep 2026",
-    "description": "Awarded to students demonstrating strong academic performance and active involvement in STEM projects, competitions, or research.",
-    "requirements": [
-      "Minimum GPA of 3.3 or equivalent",
-      "Currently enrolled in a STEM undergraduate program",
-      "One recommendation letter from a faculty member"
-    ],
-    "deadline": "30 Sep 2026",
-    "skills": ["STEM", "Research", "Academic", "Data Analysis"]
-  },
-  {
-    "type": "scholarship",
-    "title": "Future Builders Grant",
-    "subtitle": "$600 - Deadline: 12 Oct 2026",
-    "description": "Supports students developing independent technical projects, innovative ideas, or early-stage startups alongside their studies.",
-    "requirements": [
-      "Submit a short project proposal or existing project link",
-      "Currently enrolled in an accredited institution",
-      "Open to students from all fields of study"
-    ],
-    "deadline": "12 Oct 2026",
-    "skills": ["Open Source", "Software", "Python", "UX Design"]
-  },
-  {
-    "type": "scholarship",
-    "title": "Women in Technology Scholarship",
-    "subtitle": "$1,000 - Deadline: 20 Oct 2026",
-    "description": "Provides financial support to students pursuing technology-related degrees who demonstrate academic achievement and interest in building a career in technology.",
-    "requirements": [
-      "Currently pursuing a degree in Computer Science, IT, or a related field",
-      "Minimum GPA of 3.0 or equivalent",
-      "Submit a personal statement describing career goals"
-    ],
-    "deadline": "20 Oct 2026",
-    "skills": ["Computer Science", "IT", "Tech", "Python"]
-  },
-  {
-    "type": "scholarship",
-    "title": "Global Technology Scholars Award",
-    "subtitle": "$2,000 - Deadline: 5 Nov 2026",
-    "description": "Provides financial assistance to students pursuing technology and engineering degrees who demonstrate academic achievement and a commitment to innovation.",
-    "requirements": [
-      "Enrolled in an undergraduate or postgraduate technology program",
-      "Academic transcript demonstrating strong performance",
-      "Personal statement describing an intended technology career"
-    ],
-    "location": "International",
-    "deadline": "5 Nov 2026",
-    "skills": ["Engineering", "Innovation", "Technology"]
-  },
-  {
-    "type": "scholarship",
-    "title": "Innovation Project Grant",
-    "subtitle": "$1,500 - Deadline: 15 Nov 2026",
-    "description": "Supports students developing innovative projects that use technology to address practical problems in education, sustainability, healthcare, or community development.",
-    "requirements": [
-      "Submit a project proposal",
-      "Describe the expected impact of the project",
-      "Currently enrolled at an accredited college or university"
-    ],
-    "deadline": "15 Nov 2026",
-    "skills": ["Technology", "Innovation", "Healthcare", "Education"]
-  },
-  {
-    "type": "scholarship",
-    "title": "Academic Achievement Scholarship",
-    "subtitle": "$1,200 - Deadline: 30 Nov 2026",
-    "description": "Recognises students who have demonstrated consistent academic achievement and active participation in extracurricular or community activities.",
-    "requirements": [
-      "Minimum GPA of 3.5 or equivalent",
-      "Submit an academic transcript",
-      "Provide details of extracurricular or community involvement"
-    ],
-    "deadline": "30 Nov 2026",
-    "skills": ["Academic", "Leadership", "Research"]
+    "skills": [
+      "Product Management",
+      "UX Design",
+      "Data Analysis",
+      "Product"
+    ]
   },
   {
     "type": "internship",
@@ -202,6 +171,11 @@
     ],
     "location": "Cambridge, MA (On-site)",
     "deadline": "10 Dec 2026",
-    "skills": ["Research", "Data Analysis", "Python", "Technical Documentation"]
+    "skills": [
+      "Research",
+      "Data Analysis",
+      "Python",
+      "Technical Documentation"
+    ]
   }
 ]

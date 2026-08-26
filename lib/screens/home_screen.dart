@@ -10,7 +10,7 @@ import 'resume_analysis_screen.dart';
 import 'settings_screen.dart';
 import '../scholarships_screen.dart';
 import '../skill_roadmap_screen.dart';
-import '../ai_career_chat_screen.dart';
+import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AICareerChatScreen(),
+                            builder: (context) => const ChatScreen(),
                           ),
                         );
                       },

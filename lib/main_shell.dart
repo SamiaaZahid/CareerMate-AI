@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'analysis_screen.dart';
 import 'constants/app_colors.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/resume_analysis_screen.dart';
 import 'screens/settings_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -20,7 +20,7 @@ class _MainShellState extends State<MainShell> {
 
   static const List<Widget> _screens = [
     HomeScreen(),
-    AnalysisScreen(),
+    ResumeAnalysisScreen(),
     ProfileScreen(),
     SettingsScreen(),
   ];

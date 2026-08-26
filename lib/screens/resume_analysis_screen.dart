@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
 import '../services/resume_analysis_service.dart';
+import '../services/scholarship_service.dart';
 import '../services/theme_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
@@ -45,76 +48,85 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
   ResumeAnalysisResult? _result;
   String _targetRole = 'Software Engineering';
 
-  final List<RecommendationItemData> _internships = const [
-    RecommendationItemData(
-      type: RecommendationType.internship,
-      title: 'Software Engineering Intern',
-      subtitle: 'Google - Jun 2026 to Aug 2026',
-      description:
-          'Work alongside senior engineers on production systems, contribute to '
-          'code reviews, and ship small features end-to-end during a 10-week '
-          'summer internship.',
-      requirements: [
-        'Currently pursuing a degree in Computer Science or related field',
-        'Comfortable with at least one OOP language (Java, Python, C++)',
-        'Strong problem-solving and communication skills',
-      ],
-      location: 'Mountain View, CA (Hybrid)',
-      deadline: 'Applications close 15 Sep 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.internship,
-      title: 'Frontend Intern',
-      subtitle: 'Notion - Jul 2026 to Sep 2026',
-      description:
-          'Help build delightful, accessible UI components used by millions of '
-          'users, working closely with design and product teams.',
-      requirements: [
-        'Experience with React or a similar component-based framework',
-        'Eye for detail in UI/UX implementation',
-        'Portfolio or GitHub with frontend projects',
-      ],
-      location: 'Remote',
-      deadline: 'Applications close 20 Sep 2026',
-    ),
-  ];
-
-  final List<RecommendationItemData> _scholarships = const [
-    RecommendationItemData(
-      type: RecommendationType.scholarship,
-      title: 'STEM Excellence Scholarship',
-      subtitle: '\$800 - Deadline: 30 Sep 2026',
-      description:
-          'Awarded to students demonstrating strong academic performance and '
-          'active involvement in STEM projects or research.',
-      requirements: [
-        'Minimum GPA of 3.3 or equivalent',
-        'Enrolled in a STEM undergraduate program',
-        'One recommendation letter from a faculty member',
-      ],
-      deadline: '30 Sep 2026',
-    ),
-    RecommendationItemData(
-      type: RecommendationType.scholarship,
-      title: 'Future Builders Grant',
-      subtitle: '\$600 - Deadline: 12 Oct 2026',
-      description:
-          'Supports students building independent technical projects or '
-          'startups alongside their studies.',
-      requirements: [
-        'Submit a short project proposal or existing project link',
-        'Currently enrolled in an accredited institution',
-        'Open to all fields of study',
-      ],
-      deadline: '12 Oct 2026',
-    ),
-  ];
+  // Resume/skill-derived recommendations. Populated by _loadRecommendations()
+  // from assets/data/programs.json, matched against the user's stored skills
+  // and Gemini's missingSkills — never hardcoded, never static per-user.
+  List<RecommendationItemData> _internships = [];
+  List<RecommendationItemData> _scholarships = [];
+  List<String> _userSkillsList = [];
 
   @override
   void initState() {
     super.initState();
-    _loadUserEvaluation();
-    _loadAndAnalyze();
+    _initLoad();
+  }
+
+  Future<void> _initLoad() async {
+    await Future.wait([_loadUserEvaluation(), _loadAndAnalyze()]);
+    await _loadRecommendations();
+  }
+
+  /// Loads every program from programs.json, scores each one against the
+  /// user's stored skills (and, once analysis has run, Gemini's
+  /// missingSkills so growth-relevant programs surface too), and keeps only
+  /// the strongest matches per type. Falls back to showing the first few
+  /// unmatched entries only if literally nothing scored above zero, so the
+  /// section is never silently empty — but it's never fabricated either.
+  Future<void> _loadRecommendations() async {
+    try {
+      // Internships: programs.json (internship-only now), matched against
+      // the user's skills + Gemini's missingSkills.
+      final jsonString = await rootBundle.loadString('assets/data/programs.json');
+      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
+      final allInternships = jsonList
+          .map((e) => RecommendationItemData.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final matchSkills = <String>{
+        ..._userSkillsList.map((s) => s.trim().toLowerCase()),
+        if (_result != null) ..._result!.missingSkills.map((s) => s.trim().toLowerCase()),
+      }..removeWhere((s) => s.isEmpty);
+
+      List<MapEntry<RecommendationItemData, int>> scoreAndSort(List<RecommendationItemData> items) {
+        final entries = items.map((item) {
+          var matchCount = 0;
+          for (final progSkill in item.skills) {
+            final pLower = progSkill.trim().toLowerCase();
+            final matched = matchSkills.any(
+              (uSkill) => pLower == uSkill || pLower.contains(uSkill) || uSkill.contains(pLower),
+            );
+            if (matched) matchCount++;
+          }
+          return MapEntry(item, matchCount);
+        }).toList();
+        entries.sort((a, b) => b.value.compareTo(a.value));
+        return entries;
+      }
+
+      List<RecommendationItemData> topThree(List<MapEntry<RecommendationItemData, int>> scored) {
+        final matched = scored.where((e) => e.value > 0).toList();
+        final source = matched.isNotEmpty ? matched : scored;
+        return source.take(3).map((e) => e.key).toList();
+      }
+
+      // Scholarships: scholarships.json (the single source of truth also
+      // used by the Scholarships tab) via the shared Scholarship model.
+      // That dataset has no skill tags, so we don't fabricate a skill
+      // match score for it — we just show the real, current set.
+      final scholarships = await ScholarshipService().fetchScholarships();
+      final scholarshipItems = scholarships
+          .map((s) => RecommendationItemData.fromScholarship(s))
+          .take(3)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        _internships = topThree(scoreAndSort(allInternships));
+        _scholarships = scholarshipItems;
+      });
+    } catch (e) {
+      debugPrint('[ResumeAnalysisScreen] Failed to load recommendations: $e');
+    }
   }
 
   Future<void> _loadUserEvaluation() async {
@@ -151,6 +163,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
           _eduPts = eduPts;
           _goalsPts = goalsPts;
           _resumeScore = totalScore;
+          _userSkillsList = skillsList;
         });
       }
     }
@@ -581,7 +594,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
       case _AnalysisStatus.error:
         return _AnalysisErrorState(
           colors: colors,
-          onRetry: _loadAndAnalyze,
+          onRetry: _initLoad,
         );
 
       case _AnalysisStatus.ready:
