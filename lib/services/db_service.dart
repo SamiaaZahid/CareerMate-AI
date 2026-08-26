@@ -24,7 +24,7 @@ class DbService {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE users (
@@ -39,6 +39,7 @@ class DbService {
             skills TEXT,
             career_goals TEXT,
             resume_path TEXT,
+            resume_text TEXT,
             photo_path TEXT
           )
         ''');
@@ -86,6 +87,15 @@ class DbService {
             if (!existing.contains(entry.key)) {
               await db.execute('ALTER TABLE users ADD COLUMN ${entry.key} ${entry.value}');
             }
+          }
+        }
+
+        if (oldVersion < 4) {
+          final columns = await db.rawQuery("PRAGMA table_info(users)");
+          final existing = columns.map((row) => row['name'] as String).toSet();
+
+          if (!existing.contains('resume_text')) {
+            await db.execute('ALTER TABLE users ADD COLUMN resume_text TEXT');
           }
         }
       },

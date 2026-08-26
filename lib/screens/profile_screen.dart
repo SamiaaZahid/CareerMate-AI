@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import '../services/resume_text_extractor.dart';
 import 'home_screen.dart';
 import 'resume_analysis_screen.dart';
 import 'settings_screen.dart';
@@ -467,7 +468,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final resumePathToSave = file.path ?? file.name;
                     debugPrint('[ProfileScreen] Updating user $userId with resume_path: $resumePathToSave');
 
-                    final updateResult = await DbService.instance.updateUserById(userId, {'resume_path': resumePathToSave});
+                    final extraction = await ResumeTextExtractor.extract(bytes, file.name);
+                    debugPrint(
+                      '[ProfileScreen] Extraction status: ${extraction.status}, text length: ${extraction.text.length}',
+                    );
+
+                    final updateResult = await DbService.instance.updateUserById(userId, {
+                      'resume_path': resumePathToSave,
+                      'resume_text': extraction.text,
+                    });
                     debugPrint('[ProfileScreen] updateUserById result: $updateResult');
 
                     setState(() {
@@ -476,12 +485,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (!context.mounted) return;
                     final messenger = ScaffoldMessenger.of(context);
                     final double snackLeft = MediaQuery.of(context).size.width * 0.5;
+
+                    final String snackMessage;
+                    switch (extraction.status) {
+                      case ResumeExtractionStatus.success:
+                        snackMessage = 'Uploaded: ${file.name}';
+                        break;
+                      case ResumeExtractionStatus.unsupportedFormat:
+                        snackMessage = 'Uploaded, but .doc isn\'t supported for AI analysis — '
+                            'please re-upload as PDF or DOCX to get a real resume score.';
+                        break;
+                      case ResumeExtractionStatus.tooShort:
+                        snackMessage = 'Uploaded, but we couldn\'t read much text from this file — '
+                            'if it\'s a scanned/image resume, try a text-based PDF instead.';
+                        break;
+                      case ResumeExtractionStatus.failed:
+                        snackMessage = 'Uploaded, but something went wrong reading this file\'s content.';
+                        break;
+                    }
+
                     messenger.showSnackBar(
                       SnackBar(
                         behavior: SnackBarBehavior.floating,
                         margin: EdgeInsets.only(left: snackLeft, bottom: 16, right: 16),
                         backgroundColor: AppColors.primaryPurple,
-                        content: Text('Uploaded: ${file.name}', style: const TextStyle(color: Colors.white)),
+                        content: Text(snackMessage, style: const TextStyle(color: Colors.white)),
                       ),
                     );
                   } catch (e, st) {

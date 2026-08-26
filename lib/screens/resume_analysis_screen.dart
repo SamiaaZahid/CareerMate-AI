@@ -6,6 +6,7 @@ import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import '../services/resume_analysis_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'program_details_screen.dart';
@@ -14,6 +15,14 @@ import 'settings_screen.dart';
 const Color kAnalysisPrimaryColor = AppColors.primaryPurple;
 const Color kAnalysisBorderColor = Color(0xFFE8E1F5);
 const Color kAnalysisInactiveColor = Color(0xFF8B8B98);
+
+/// Which phase of loading/analysis the screen is currently showing.
+enum _AnalysisStatus {
+  loading,
+  noResume,
+  error,
+  ready,
+}
 
 class ResumeAnalysisScreen extends StatefulWidget {
   const ResumeAnalysisScreen({super.key});
@@ -25,11 +34,8 @@ class ResumeAnalysisScreen extends StatefulWidget {
 class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
   int _selectedIndex = 1;
 
-  final List<String> _missingSkills = const [
-    'AWS / Cloud Services',
-    'Docker / Containerization',
-    'CI/CD Pipelines',
-  ];
+  _AnalysisStatus _status = _AnalysisStatus.loading;
+  ResumeAnalysisResult? _result;
 
   final List<RecommendationItemData> _internships = const [
     RecommendationItemData(
@@ -106,20 +112,49 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
   @override
   void initState() {
     super.initState();
-    _logAnalysisDiagnostics();
+    _loadAndAnalyze();
   }
 
-  Future<void> _logAnalysisDiagnostics() async {
-    final userId = AuthService.instance.currentUserId;
-    String? resumePath;
-    if (userId != null) {
-      final user = await DbService.instance.getUserById(userId);
-      resumePath = user?['resume_path'] as String?;
+  /// Loads the logged-in user's extracted resume text from the DB and,
+  /// if present, sends it to Gemini for real analysis. Replaces the old
+  /// hardcoded 78/100 mock — every state here reflects what's actually
+  /// in the user's row and what Gemini actually returned.
+  Future<void> _loadAndAnalyze() async {
+    if (mounted) {
+      setState(() => _status = _AnalysisStatus.loading);
     }
+
+    final userId = AuthService.instance.currentUserId;
     debugPrint('[ResumeAnalysisScreen] Active userId: $userId');
-    debugPrint('[ResumeAnalysisScreen] User resume_path from DB: $resumePath');
-    debugPrint('[ResumeAnalysisScreen] API call triggered: FALSE (currently using static mock data)');
-    debugPrint('[ResumeAnalysisScreen] Displaying static score: 78/100, missing skills: $_missingSkills');
+    if (userId == null) {
+      if (!mounted) return;
+      setState(() => _status = _AnalysisStatus.noResume);
+      return;
+    }
+
+    final user = await DbService.instance.getUserById(userId);
+    final resumeText = (user?['resume_text'] as String?) ?? '';
+    debugPrint('[ResumeAnalysisScreen] resume_text length from DB: ${resumeText.length}');
+
+    if (resumeText.trim().isEmpty) {
+      if (!mounted) return;
+      setState(() => _status = _AnalysisStatus.noResume);
+      return;
+    }
+
+    final result = await ResumeAnalysisService.instance.analyze(resumeText: resumeText);
+    if (!mounted) return;
+
+    if (result == null) {
+      debugPrint('[ResumeAnalysisScreen] Analysis failed or returned null.');
+      setState(() => _status = _AnalysisStatus.error);
+    } else {
+      debugPrint('[ResumeAnalysisScreen] Analysis succeeded. Score: ${result.score}');
+      setState(() {
+        _result = result;
+        _status = _AnalysisStatus.ready;
+      });
+    }
   }
 
   @override
@@ -222,55 +257,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Center(
-                child: _ScoreRing(
-                  scoreText: '78 / 100',
-                  progress: 0.78,
-                  primaryColor: primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: Text(
-                  'Resume Score',
-                  style: _bodyStyle.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-              const SizedBox(height: 24),
-              _BulletCard(
-                title: 'Strengths',
-                icon: Icons.check_circle_rounded,
-                iconColor: const Color(0xFF2FA84F),
-                bullets: const [
-                  'Strong project section with clear outcomes',
-                  'Relevant technical keywords already included',
-                  'Good structure and readable formatting',
-                ],
-                bulletIcon: Icons.star_rounded,
-                borderColor: cardBorder,
-                primaryColor: primaryColor,
-              ),
-              const SizedBox(height: 16),
-              _BulletCard(
-                title: 'Areas for Improvement',
-                icon: Icons.warning_amber_rounded,
-                iconColor: const Color(0xFFE08A1E),
-                bullets: const [
-                  'Add more measurable achievements and metrics',
-                  'Highlight cloud and deployment experience',
-                  'Include collaboration and leadership examples',
-                ],
-                bulletIcon: Icons.arrow_right_alt_rounded,
-                borderColor: cardBorder,
-                primaryColor: primaryColor,
-              ),
-              const SizedBox(height: 16),
-              _SkillsSection(
-                title: 'Missing Skills Detected',
-                chips: _missingSkills,
-                borderColor: cardBorder,
-                primaryColor: primaryColor,
-              ),
+              _buildAnalysisSection(primaryColor: primaryColor, cardBorder: cardBorder),
               const SizedBox(height: 16),
               _RecommendationSection(
                 title: 'Recommended Internships',
@@ -354,6 +341,271 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
             icon: Icon(Icons.settings_outlined),
             activeIcon: Icon(Icons.settings_rounded),
             label: 'Settings',
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Renders the score ring + strengths/improvements/missing-skills
+  /// cards, or an appropriate loading/empty/error state in their place.
+  Widget _buildAnalysisSection({
+    required Color primaryColor,
+    required Color cardBorder,
+  }) {
+    switch (_status) {
+      case _AnalysisStatus.loading:
+        return _AnalysisLoadingState(primaryColor: primaryColor);
+
+      case _AnalysisStatus.noResume:
+        return _AnalysisEmptyState(
+          primaryColor: primaryColor,
+          borderColor: cardBorder,
+          onUploadPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
+        );
+
+      case _AnalysisStatus.error:
+        return _AnalysisErrorState(
+          primaryColor: primaryColor,
+          borderColor: cardBorder,
+          onRetry: _loadAndAnalyze,
+        );
+
+      case _AnalysisStatus.ready:
+        final result = _result!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: _ScoreRing(
+                scoreText: '${result.score} / 100',
+                progress: result.score / 100,
+                primaryColor: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                'Resume Score',
+                style: _bodyStyle.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (result.strengths.isNotEmpty) ...[
+              _BulletCard(
+                title: 'Strengths',
+                icon: Icons.check_circle_rounded,
+                iconColor: const Color(0xFF2FA84F),
+                bullets: result.strengths,
+                bulletIcon: Icons.star_rounded,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (result.improvements.isNotEmpty) ...[
+              _BulletCard(
+                title: 'Areas for Improvement',
+                icon: Icons.warning_amber_rounded,
+                iconColor: const Color(0xFFE08A1E),
+                bullets: result.improvements,
+                bulletIcon: Icons.arrow_right_alt_rounded,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (result.missingSkills.isNotEmpty)
+              _SkillsSection(
+                title: 'Missing Skills Detected',
+                chips: result.missingSkills,
+                borderColor: cardBorder,
+                primaryColor: primaryColor,
+              ),
+          ],
+        );
+    }
+  }
+}
+
+class _AnalysisLoadingState extends StatelessWidget {
+  const _AnalysisLoadingState({required this.primaryColor});
+
+  final Color primaryColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Center(
+        child: Column(
+          children: [
+            CircularProgressIndicator(color: primaryColor),
+            const SizedBox(height: 16),
+            Text(
+              'Analyzing your resume…',
+              style: TextStyle(
+                fontFamily: 'Be Vietnam Pro',
+                fontFamilyFallback: const ['sans-serif'],
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalysisEmptyState extends StatelessWidget {
+  const _AnalysisEmptyState({
+    required this.primaryColor,
+    required this.borderColor,
+    required this.onUploadPressed,
+  });
+
+  final Color primaryColor;
+  final Color borderColor;
+  final VoidCallback onUploadPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.description_outlined, color: primaryColor, size: 40),
+          const SizedBox(height: 12),
+          Text(
+            'No resume found yet',
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: const ['sans-serif'],
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Upload a PDF or DOCX resume in your Profile to get a real AI-powered analysis.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontSize: 13,
+              color: Color(0xFF6F6F7B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 40,
+            child: ElevatedButton(
+              onPressed: onUploadPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accentOrange,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+              child: const Text(
+                'Go to Profile',
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontFamilyFallback: ['sans-serif'],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalysisErrorState extends StatelessWidget {
+  const _AnalysisErrorState({
+    required this.primaryColor,
+    required this.borderColor,
+    required this.onRetry,
+  });
+
+  final Color primaryColor;
+  final Color borderColor;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFE05A5A), size: 40),
+          const SizedBox(height: 12),
+          Text(
+            'Couldn\'t analyze your resume',
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: const ['sans-serif'],
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Something went wrong reaching the AI service. Please try again.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Be Vietnam Pro',
+              fontFamilyFallback: ['sans-serif'],
+              fontSize: 13,
+              color: Color(0xFF6F6F7B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 40,
+            child: ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+              ),
+              child: const Text(
+                'Retry',
+                style: TextStyle(
+                  fontFamily: 'Be Vietnam Pro',
+                  fontFamilyFallback: ['sans-serif'],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         ],
       ),
