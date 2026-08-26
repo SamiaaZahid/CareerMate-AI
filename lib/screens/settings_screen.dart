@@ -467,10 +467,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _selectedIndex = index;
           });
           if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            }
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,

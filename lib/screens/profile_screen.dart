@@ -1,14 +1,15 @@
-import 'dart:io';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import '../widgets/user_avatar_widget.dart';
 import 'home_screen.dart';
 import 'resume_analysis_screen.dart';
 import 'settings_screen.dart';
@@ -31,10 +32,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _collegeController = TextEditingController();
   final TextEditingController _preferredLocationController = TextEditingController();
   final TextEditingController _careerGoalsController = TextEditingController();
+  final TextEditingController _skillInputController = TextEditingController();
 
   int _selectedIndex = 2;
   String _selectedYear = '3rd Year';
   final List<String> _skills = ['Data Analysis', 'Python', 'UX Design'];
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _degreeController.dispose();
+    _collegeController.dispose();
+    _preferredLocationController.dispose();
+    _careerGoalsController.dispose();
+    _skillInputController.dispose();
+    super.dispose();
+  }
+
+  void _addSkill() {
+    final newSkill = _skillInputController.text.trim();
+    if (newSkill.isEmpty) return;
+    if (_skills.any((s) => s.toLowerCase() == newSkill.toLowerCase())) {
+      _skillInputController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Skill "$newSkill" is already added')),
+      );
+      return;
+    }
+    setState(() {
+      _skills.add(newSkill);
+      _skillInputController.clear();
+    });
+  }
   String? _resumePath;
   String? _photoPath;
   Uint8List? _photoBytes;
@@ -63,66 +92,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
   Widget _buildAvatarWidget(Color primaryColor, Color iconBgColor) {
-    if (_photoBytes != null && _photoBytes!.isNotEmpty) {
-      return ClipOval(
-        child: Image.memory(
-          _photoBytes!,
-          key: ValueKey('bytes-${_photoBytes.hashCode}-${DateTime.now().millisecondsSinceEpoch}'),
-          width: 106,
-          height: 106,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
-        ),
-      );
-    }
-    if (_photoPath != null && _photoPath!.isNotEmpty) {
-      final photoPath = _photoPath!;
-      final isNetwork = photoPath.startsWith('http://') || photoPath.startsWith('https://');
-      final imageKey = ValueKey('$photoPath-${DateTime.now().millisecondsSinceEpoch}');
-
-      if (isNetwork) {
-        return ClipOval(
-          child: Image.network(
-            photoPath,
-            key: imageKey,
-            width: 106,
-            height: 106,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
-          ),
-        );
-      } else if (!kIsWeb && File(photoPath).existsSync()) {
-        return ClipOval(
-          child: Image.file(
-            File(photoPath),
-            key: imageKey,
-            width: 106,
-            height: 106,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildDefaultAvatarIcon(primaryColor, iconBgColor),
-          ),
-        );
-      }
-    }
-    return _buildDefaultAvatarIcon(primaryColor, iconBgColor);
+    return UserAvatarWidget(
+      photoPath: _photoPath,
+      photoBytes: _photoBytes,
+      size: 106,
+      iconSize: 36,
+      primaryColor: primaryColor,
+      iconBgColor: iconBgColor,
+    );
   }
 
-  Widget _buildDefaultAvatarIcon(Color primaryColor, Color iconBgColor) {
-    return Center(
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: iconBgColor,
-        ),
-        child: Icon(
-          Icons.person,
-          size: 36,
-          color: primaryColor,
-        ),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
   }
 
   @override
@@ -217,6 +200,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (result.isEmpty) return;
                           final file = result.first;
                           final bytes = await file.readAsBytes();
+                          if (bytes.lengthInBytes > 5 * 1024 * 1024) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Image file too large. Maximum size is 5MB.')),
+                            );
+                            return;
+                          }
                           try {
                             final userId = AuthService.instance.currentUserId;
                             if (userId == null) {
@@ -224,12 +214,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to update your profile')));
                               return;
                             }
-                            final photoPathToSave = file.path ?? file.name;
+                            String photoPathToSave;
+                            if (kIsWeb) {
+                              final ext = file.name.contains('.') ? file.name.split('.').last.toLowerCase() : 'png';
+                              final mimeType = (ext == 'jpg' || ext == 'jpeg') ? 'image/jpeg' : 'image/png';
+                              final base64Str = base64Encode(bytes);
+                              photoPathToSave = 'data:$mimeType;base64,$base64Str';
+                            } else {
+                              photoPathToSave = file.path ?? file.name;
+                            }
                             await DbService.instance.updateUserById(userId, {'photo_path': photoPathToSave});
                             PaintingBinding.instance.imageCache.clear();
                             PaintingBinding.instance.imageCache.clearLiveImages();
                             if (!context.mounted) return;
                             setState(() {
+                              final ts = DateTime.now().toIso8601String();
+                              debugPrint('[$ts] [ProfileScreen] setState via Edit Photo -> _photoBytes length: ${bytes.length}');
                               _photoBytes = bytes;
                               _photoPath = photoPathToSave;
                             });
@@ -281,12 +281,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              FutureBuilder(
-                future: _loadUser(),
-                builder: (context, snapshot) {
-                  return const SizedBox.shrink();
-                },
-              ),
               _FieldGroup(
                 label: 'Full Name',
                 child: TextField(
@@ -370,61 +364,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               _FieldGroup(
                 label: 'Key Skills',
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _skills
-                        .map(
-                          (skill) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: iconBgColor,
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(color: borderColor),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '$skill ×',
-                                  style: TextStyle(
-                                    fontFamily: 'Be Vietnam Pro',
-                                    fontFamilyFallback: const ['sans-serif'],
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: primaryColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _skills.remove(skill);
-                                    });
-                                  },
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: primaryColor,
-                                  ),
-                                ),
-                              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _skillInputController,
+                            style: _fieldStyle,
+                            onSubmitted: (_) => _addSkill(),
+                            decoration: _inputDecoration(
+                              hintText: 'Add a new skill (e.g. Flutter, SQL)',
+                              icon: Icons.code_rounded,
+                              primaryColor: primaryColor,
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: _addSkill,
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('Add'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: _skills
+                            .map(
+                              (skill) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: iconBgColor,
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(color: borderColor),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      skill,
+                                      style: TextStyle(
+                                        fontFamily: 'Be Vietnam Pro',
+                                        fontFamilyFallback: const ['sans-serif'],
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _skills.remove(skill);
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -573,18 +601,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       'career_goals': _careerGoalsController.text.trim(),
                     };
 
+                    debugPrint('[ProfileScreen] Save Profile tapped. Payload: $payload');
+                    debugPrint('[ProfileScreen] Pre-save avatar state -> _photoPath: $_photoPath, _photoBytes != null: ${_photoBytes != null}');
+
                     final updated = await DbService.instance.updateUserById(userId, payload);
+                    final userAfterSave = await DbService.instance.getUserById(userId);
+                    debugPrint('[ProfileScreen] Post-save DB user record photo_path: ${userAfterSave?['photo_path']}');
                     if (!context.mounted) return;
                     if (updated > 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Profile saved')),
                       );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                      );
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      } else {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        );
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Unable to save profile')),
@@ -637,21 +674,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _selectedIndex = index;
           });
           if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomeScreen(),
+                ),
+              );
+            }
           } else if (index == 1) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const ResumeAnalysisScreen(),
               ),
             );
           } else if (index == 3) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const SettingsScreen(),
@@ -689,25 +730,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (user == null) return;
     if (!mounted) return;
 
+    debugPrint('[ProfileScreen] _loadUser -> loaded photo_path from DB: ${user['photo_path']}');
+
     final storedSkills = (user['skills'] as String?) ?? '';
     final parsedSkills = storedSkills.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
-    setState(() {
-      _fullName = user['name'] as String?;
-      _resumePath = user['resume_path'] as String?;
-      _photoPath = user['photo_path'] as String?;
-      _selectedYear = (user['year_of_study'] as String?) ?? _selectedYear;
-      _fullNameController.text = _fullName ?? '';
-      _degreeController.text = (user['degree'] as String?) ?? '';
-      _collegeController.text = (user['college'] as String?) ?? '';
-      _preferredLocationController.text = (user['preferred_location'] as String?) ?? '';
-      _careerGoalsController.text = (user['career_goals'] as String?) ?? '';
-      if (parsedSkills.isNotEmpty) {
-        _skills
-          ..clear()
-          ..addAll(parsedSkills);
-      }
-    });
+    final newName = user['name'] as String?;
+    final newResume = user['resume_path'] as String?;
+    final newPhoto = user['photo_path'] as String?;
+    final newYear = (user['year_of_study'] as String?) ?? _selectedYear;
+    final newDegree = (user['degree'] as String?) ?? '';
+    final newCollege = (user['college'] as String?) ?? '';
+    final newLoc = (user['preferred_location'] as String?) ?? '';
+    final newGoals = (user['career_goals'] as String?) ?? '';
+
+    if (_fullNameController.text != (newName ?? '')) _fullNameController.text = newName ?? '';
+    if (_degreeController.text != newDegree) _degreeController.text = newDegree;
+    if (_collegeController.text != newCollege) _collegeController.text = newCollege;
+    if (_preferredLocationController.text != newLoc) _preferredLocationController.text = newLoc;
+    if (_careerGoalsController.text != newGoals) _careerGoalsController.text = newGoals;
+
+    if (!listEquals(_skills, parsedSkills) && parsedSkills.isNotEmpty) {
+      _skills
+        ..clear()
+        ..addAll(parsedSkills);
+    }
+
+    if (_fullName != newName ||
+        _resumePath != newResume ||
+        _photoPath != newPhoto ||
+        _selectedYear != newYear) {
+      setState(() {
+        final ts = DateTime.now().toIso8601String();
+        debugPrint('[$ts] [ProfileScreen] setState via _loadUser -> photo_path updated to: $newPhoto');
+        _fullName = newName;
+        _resumePath = newResume;
+        _photoPath = newPhoto;
+        _selectedYear = newYear;
+      });
+    }
   }
 
   InputDecoration _inputDecoration({

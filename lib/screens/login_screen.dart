@@ -320,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [ Text( "Don't have an account? ",
                                   style: _bodyStyle.copyWith(fontSize: 14, color: const Color(0xFF5F5F6B),), ),
                                 TextButton( onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute( builder: (context) =>const SignUpScreen(),), );
+                                    Navigator.pushReplacement(context, MaterialPageRoute( builder: (context) =>const SignUpScreen(),), );
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,

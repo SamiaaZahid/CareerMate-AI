@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import '../widgets/user_avatar_widget.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'program_listing_screen.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? _profileName;
+  String? _photoPath;
   bool _hasCvUploaded = false;
   String? _cvFileName;
 
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _profileName = null;
+          _photoPath = null;
           _hasCvUploaded = false;
           _cvFileName = null;
         });
@@ -71,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final user = await DbService.instance.getUserById(userId);
     final name = (user?['name'] as String?)?.trim();
+    final photoPath = (user?['photo_path'] as String?)?.trim();
     final resumePath = (user?['resume_path'] as String?)?.trim();
     final hasCv = resumePath != null && resumePath.isNotEmpty;
     final fileName = hasCv ? resumePath.split(RegExp(r'[/\\]')).last : null;
@@ -79,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       setState(() {
         _profileName = name?.isNotEmpty == true ? name : null;
+        _photoPath = photoPath;
         _hasCvUploaded = hasCv;
         _cvFileName = fileName;
       });
@@ -126,17 +131,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: Color(0x33FFFFFF),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 20,
-                color: Colors.white,
+            child: GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+                _loadUserData();
+              },
+              child: UserAvatarWidget(
+                photoPath: _photoPath,
+                size: 36,
+                iconSize: 20,
+                primaryColor: Colors.white,
+                iconBgColor: const Color(0x33FFFFFF),
               ),
             ),
           ),
