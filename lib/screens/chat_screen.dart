@@ -1,6 +1,71 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../services/chat_service.dart';
+
+class BouncingDotsTypingIndicator extends StatefulWidget {
+  const BouncingDotsTypingIndicator({super.key, required this.color});
+  final Color color;
+
+  @override
+  State<BouncingDotsTypingIndicator> createState() => _BouncingDotsTypingIndicatorState();
+}
+
+class _BouncingDotsTypingIndicatorState extends State<BouncingDotsTypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        final delay = index * 0.2;
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final value = (_controller.value - delay) % 1.0;
+            final bounce = math.sin(value * math.pi);
+            final opacity = (bounce < 0 ? 0.3 : 0.3 + 0.7 * bounce).clamp(0.3, 1.0);
+            final offset = (bounce < 0 ? 0.0 : -4.0 * bounce);
+
+            return Transform.translate(
+              offset: Offset(0, offset),
+              child: Opacity(
+                opacity: opacity,
+                child: Container(
+                  margin: EdgeInsets.only(right: index == 2 ? 0 : 4),
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: widget.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
+}
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -141,23 +206,52 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           border: isUser ? null : Border.all(color: borderColor),
         ),
-        child: Text(
-          message.text,
-          style: _bubbleTextStyle.copyWith(color: isUser ? Colors.white : Theme.of(context).colorScheme.onSurface),
-        ),
+        child: isUser
+            ? Text(
+                message.text,
+                style: _bubbleTextStyle.copyWith(color: Colors.white),
+              )
+            : MarkdownBody(
+                data: message.text,
+                selectable: true,
+                styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                  p: _bubbleTextStyle.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                  listBullet: _bubbleTextStyle.copyWith(color: Theme.of(context).colorScheme.onSurface),
+                  strong: _bubbleTextStyle.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  h1: _bubbleTextStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                  h2: _bubbleTextStyle.copyWith(fontSize: 16, fontWeight: FontWeight.bold),
+                  h3: _bubbleTextStyle.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+              ),
       ),
     );
   }
 
   Widget _buildTypingIndicator(Color primaryColor) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, bottom: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2, color: primaryColor),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final aiBubble = Theme.of(context).cardColor;
+    final borderColor = isDark ? const Color(0xFF2C2C35) : const Color(0xFFE8E1F5);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(left: 16, bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: aiBubble,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(4),
+            bottomRight: Radius.circular(16),
+          ),
+          border: Border.all(color: borderColor),
+        ),
+        child: BouncingDotsTypingIndicator(
+          color: isDark ? const Color(0xFF9A9AA6) : Colors.grey.shade600,
         ),
       ),
     );

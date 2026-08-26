@@ -299,21 +299,25 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
             _selectedIndex = index;
           });
           if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomeScreen(),
+                ),
+              );
+            }
           } else if (index == 2) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const ProfileScreen(),
               ),
             );
           } else if (index == 3) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => const SettingsScreen(),
