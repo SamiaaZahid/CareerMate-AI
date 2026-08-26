@@ -103,7 +103,7 @@ class ResumeTextExtractor {
   }
 
   /// A .docx file is a zip archive containing XML. The visible document
-  /// text lives in word/document.xml, inside <w:t> elements.
+  /// text lives in word/document.xml, inside `<w:t>` elements.
   static String _extractDocx(Uint8List bytes) {
     final archive = ZipDecoder().decodeBytes(bytes);
     final documentFile = archive.files.firstWhere(

@@ -36,6 +36,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
 
   _AnalysisStatus _status = _AnalysisStatus.loading;
   ResumeAnalysisResult? _result;
+  String _targetRole = 'Software Engineering';
 
   final List<RecommendationItemData> _internships = const [
     RecommendationItemData(
@@ -136,13 +137,17 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
     final resumeText = (user?['resume_text'] as String?) ?? '';
     debugPrint('[ResumeAnalysisScreen] resume_text length from DB: ${resumeText.length}');
 
+    final degree = (user?['degree'] as String?)?.trim();
+    final targetRole = (degree != null && degree.isNotEmpty) ? degree : 'Software Engineering';
+    debugPrint('[ResumeAnalysisScreen] Target role for analysis: $targetRole');
+
     if (resumeText.trim().isEmpty) {
       if (!mounted) return;
       setState(() => _status = _AnalysisStatus.noResume);
       return;
     }
 
-    final result = await ResumeAnalysisService.instance.analyze(resumeText: resumeText);
+    final result = await ResumeAnalysisService.instance.analyze(resumeText: resumeText, targetRole: targetRole);
     if (!mounted) return;
 
     if (result == null) {
@@ -152,11 +157,12 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
       debugPrint('[ResumeAnalysisScreen] Analysis succeeded. Score: ${result.score}');
       setState(() {
         _result = result;
+        _targetRole = targetRole;
         _status = _AnalysisStatus.ready;
       });
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -203,7 +209,7 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'Based on your uploaded resume for a Software Engineering role, here is your AI-powered evaluation.',
+                        'Based on your uploaded resume for a $_targetRole role, here is your AI-powered evaluation.',
                         textAlign: TextAlign.center,
                         style: _bodyStyle,
                       ),
