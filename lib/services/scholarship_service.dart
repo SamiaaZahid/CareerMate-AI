@@ -1,17 +1,27 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/scholarship_model.dart';
 
 class ScholarshipService {
   Future<List<Scholarship>> fetchScholarships() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
+    final data = await Supabase.instance.client
+        .from('scholarships')
+        .select()
+        .order('created_at');
 
-    final String jsonString = await rootBundle.loadString('assets/data/scholarships.json');
-    final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
+    final rows = List<Map<String, dynamic>>.from(data);
 
-    return jsonList
-        .map((json) => Scholarship.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return rows.map((row) {
+      return Scholarship.fromJson({
+        'id': row['id'],
+        'title': row['title'] ?? '',
+        'provider': row['provider'] ?? '',
+        'amount': row['amount'] ?? '',
+        'deadline': row['deadline'] ?? '',
+        'shortDescription': row['short_description'] ?? '',
+        'fullDescription': row['full_description'] ?? '',
+        'eligibility': row['eligibility'] ?? '',
+        'icon': row['icon'] ?? 'school',
+      });
+    }).toList();
   }
 }

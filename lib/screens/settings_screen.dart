@@ -6,6 +6,7 @@ import '../services/theme_service.dart';
 import 'feedback_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import 'manage_data_login_screen.dart';
 import 'profile_screen.dart';
 import 'resume_analysis_screen.dart';
 
@@ -283,6 +284,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   setState(() {
                                     _notificationsEnabled = val;
                                   });
+                                },
+                              ),
+                              Divider(height: 1, indent: 16, endIndent: 16, color: colors.dividerColor),
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                leading: Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: colors.chipBackground,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.admin_panel_settings_outlined,
+                                    color: colors.primaryPurple,
+                                  ),
+                                ),
+                                title: Text(
+                                  'Manage Data',
+                                  style: _valueStyle(colors),
+                                ),
+                                subtitle: Text(
+                                  'Team access — edit internships, scholarships, roadmaps',
+                                  style: _labelStyle(colors),
+                                ),
+                                trailing: Icon(Icons.chevron_right, color: colors.subtitleText),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const ManageDataLoginScreen(),
+                                    ),
+                                  );
                                 },
                               ),
                               Divider(height: 1, indent: 16, endIndent: 16, color: colors.dividerColor),

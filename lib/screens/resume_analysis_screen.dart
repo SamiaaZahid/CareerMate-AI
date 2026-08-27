@@ -1,8 +1,8 @@
-import 'dart:convert';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import '../services/internship_service.dart';
 
 import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
@@ -74,13 +74,9 @@ class _ResumeAnalysisScreenState extends State<ResumeAnalysisScreen> {
   /// section is never silently empty — but it's never fabricated either.
   Future<void> _loadRecommendations() async {
     try {
-      // Internships: programs.json (internship-only now), matched against
+      // Internships: now sourced live from Supabase, matched against
       // the user's skills + Gemini's missingSkills.
-      final jsonString = await rootBundle.loadString('assets/data/programs.json');
-      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
-      final allInternships = jsonList
-          .map((e) => RecommendationItemData.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final allInternships = await InternshipService().fetchInternships();
 
       final matchSkills = <String>{
         ..._userSkillsList.map((s) => s.trim().toLowerCase()),

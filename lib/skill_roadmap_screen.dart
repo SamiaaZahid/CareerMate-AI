@@ -1,9 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'constants/app_colors.dart';
 import 'models/skill_roadmap_model.dart';
 import 'services/auth_service.dart';
+import 'services/roadmap_service.dart';
 import 'services/theme_service.dart';
 
 class SkillStepState {
@@ -78,17 +77,12 @@ class _SkillRoadmapScreenState extends State<SkillRoadmapScreen> {
       _userProfileSkills = userSkills;
       debugPrint('[SkillRoadmap] User profile skills: $_userProfileSkills');
 
-      // 2. Load JSON templates
+      // 2. Load roadmap templates from Supabase
       try {
-        final jsonString =
-            await rootBundle.loadString('assets/data/skill_roadmaps.json');
-        final Map<String, dynamic> data = json.decode(jsonString);
-        final List<dynamic> list = data['roadmaps'] as List<dynamic>? ?? [];
-        _allRoadmaps =
-            list.map((item) => SkillRoadmapModel.fromJson(item)).toList();
-        debugPrint('[SkillRoadmap] Successfully loaded ${_allRoadmaps.length} roadmaps from JSON.');
-      } catch (assetError) {
-        debugPrint('[SkillRoadmap] Asset load error: $assetError. Using built-in templates.');
+        _allRoadmaps = await RoadmapService().fetchRoadmaps();
+        debugPrint('[SkillRoadmap] Successfully loaded ${_allRoadmaps.length} roadmaps from Supabase.');
+      } catch (fetchError) {
+        debugPrint('[SkillRoadmap] Supabase fetch error: $fetchError. Using built-in templates.');
         _allRoadmaps = _getFallbackTemplates();
       }
 

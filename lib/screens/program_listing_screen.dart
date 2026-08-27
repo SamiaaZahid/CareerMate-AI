@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import '../services/internship_service.dart';
 
 import '../constants/app_colors.dart';
 import '../models/recommendation_item.dart';
@@ -50,11 +48,7 @@ class _ProgramListingScreenState extends State<ProgramListingScreen> {
       _hasError = false;
     });
     try {
-      final jsonString = await rootBundle.loadString('assets/data/programs.json');
-      final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
-      final internships = jsonList
-          .map((e) => RecommendationItemData.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final internships = await InternshipService().fetchInternships();
 
       final scholarships = await ScholarshipService().fetchScholarships();
       final scholarshipItems =

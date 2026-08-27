@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'config/api_keys.dart';
 import 'constants/app_colors.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
@@ -20,6 +23,11 @@ void main() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
+  );
 
   await AuthService.instance.init();
   await ThemeService.instance.init();
