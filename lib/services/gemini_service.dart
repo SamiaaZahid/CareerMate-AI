@@ -87,50 +87,75 @@ class GeminiService {
         ],
     };
 
-    try {
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+    // Gemini occasionally returns 500/503/429 when it's momentarily
+    // overloaded on Google's side — these are usually gone within a couple
+    // of seconds, so retry a couple of times with a short backoff before
+    // surfacing an error, instead of failing on the first hiccup.
+    const retryableStatusCodes = {429, 500, 503};
+    const maxAttempts = 3;
 
-      if (response.statusCode != 200) {
-        debugPrint('[GeminiService] API error ${response.statusCode}: ${response.body}');
-        return const GeminiResult.text(
-          'Sorry, I ran into a problem reaching the AI service. Please try again in a moment.',
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response = await http.post(
+          uri,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(body),
         );
-      }
 
-      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-      final candidates = decoded['candidates'] as List<dynamic>?;
+        if (response.statusCode != 200) {
+          debugPrint('[GeminiService] API error ${response.statusCode} (attempt $attempt/$maxAttempts): ${response.body}');
 
-      if (candidates == null || candidates.isEmpty) {
-        debugPrint('[GeminiService] No candidates in response: ${response.body}');
-        return const GeminiResult.text("Sorry, I couldn't come up with a response for that. Could you rephrase?");
-      }
+          if (retryableStatusCodes.contains(response.statusCode) && attempt < maxAttempts) {
+            await Future.delayed(Duration(milliseconds: 600 * attempt));
+            continue;
+          }
 
-      final parts = (candidates.first as Map<String, dynamic>)['content']['parts'] as List<dynamic>;
-
-      for (final part in parts) {
-        final map = part as Map<String, dynamic>;
-        if (map.containsKey('functionCall')) {
-          final call = map['functionCall'] as Map<String, dynamic>;
-          return GeminiResult.functionCall(
-            call['name'] as String,
-            (call['args'] as Map<String, dynamic>?) ?? {},
-            thoughtSignature: map['thoughtSignature'] as String?,
+          return GeminiResult.text(
+            response.statusCode == 503
+                ? "The AI service is under heavy load right now. Please try again in a moment."
+                : 'Sorry, I ran into a problem reaching the AI service. Please try again in a moment.',
           );
         }
+
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final candidates = decoded['candidates'] as List<dynamic>?;
+
+        if (candidates == null || candidates.isEmpty) {
+          debugPrint('[GeminiService] No candidates in response: ${response.body}');
+          return const GeminiResult.text("Sorry, I couldn't come up with a response for that. Could you rephrase?");
+        }
+
+        final parts = (candidates.first as Map<String, dynamic>)['content']['parts'] as List<dynamic>;
+
+        for (final part in parts) {
+          final map = part as Map<String, dynamic>;
+          if (map.containsKey('functionCall')) {
+            final call = map['functionCall'] as Map<String, dynamic>;
+            return GeminiResult.functionCall(
+              call['name'] as String,
+              (call['args'] as Map<String, dynamic>?) ?? {},
+              thoughtSignature: map['thoughtSignature'] as String?,
+            );
+          }
+        }
+
+        final text = parts.map((part) => (part as Map<String, dynamic>)['text'] ?? '').join().trim();
+
+        return GeminiResult.text(
+          text.isEmpty ? "Sorry, I couldn't come up with a response for that. Could you rephrase?" : text,
+        );
+      } catch (e) {
+        debugPrint('[GeminiService] Exception during API call (attempt $attempt/$maxAttempts): $e');
+        if (attempt < maxAttempts) {
+          await Future.delayed(Duration(milliseconds: 600 * attempt));
+          continue;
+        }
+        return const GeminiResult.text('Sorry, something went wrong while contacting the AI service.');
       }
-
-      final text = parts.map((part) => (part as Map<String, dynamic>)['text'] ?? '').join().trim();
-
-      return GeminiResult.text(
-        text.isEmpty ? "Sorry, I couldn't come up with a response for that. Could you rephrase?" : text,
-      );
-    } catch (e) {
-      debugPrint('[GeminiService] Exception during API call: $e');
-      return const GeminiResult.text('Sorry, something went wrong while contacting the AI service.');
     }
+
+    // Unreachable in practice (the loop always returns or retries), but
+    // keeps the analyzer happy about a guaranteed return value.
+    return const GeminiResult.text('Sorry, something went wrong while contacting the AI service.');
   }
 }

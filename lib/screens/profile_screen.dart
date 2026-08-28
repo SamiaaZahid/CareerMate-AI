@@ -1,14 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../constants/app_colors.dart';
 import '../services/auth_service.dart';
 import '../services/db_service.dart';
+import '../services/resume_autofill_service.dart';
 import '../services/resume_text_extractor.dart';
 import '../services/theme_service.dart';
 import '../widgets/user_avatar_widget.dart';
@@ -38,9 +41,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _skills = ['Data Analysis', 'Python', 'UX Design'];
 
   String? _resumePath;
-  String? _photoPath;
+  String? _resumeText;
   Uint8List? _photoBytes;
+  String? _photoPath;
   String? _fullName;
+  bool _isAutofilling = false;
 
   static const List<String> _yearOptions = [
     '1st Year',
@@ -251,7 +256,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   final base64Str = base64Encode(bytes);
                                   photoPathToSave = 'data:$mimeType;base64,$base64Str';
                                 } else {
-                                  photoPathToSave = file.path ?? file.name;
+                                  // FilePicker's own path can point into a temp/cache
+                                  // location the OS is free to clear at any time, which
+                                  // is why saved profile photos would silently stop
+                                  // showing after a while. Copy the bytes into the app's
+                                  // own persistent documents directory instead, and store
+                                  // that stable path — one file per user, overwritten on
+                                  // every re-upload so we don't accumulate orphans.
+                                  final docsDir = await getApplicationDocumentsDirectory();
+                                  final ext = file.name.contains('.') ? file.name.split('.').last.toLowerCase() : 'png';
+                                  final savedFile = File('${docsDir.path}/profile_photo_$userId.$ext');
+                                  await savedFile.writeAsBytes(bytes, flush: true);
+                                  photoPathToSave = savedFile.path;
                                 }
                                 await DbService.instance.updateUserById(userId, {'photo_path': photoPathToSave});
                                 PaintingBinding.instance.imageCache.clear();
@@ -531,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       try {
                         final result = await FilePicker.pickFiles(
                           type: FileType.custom,
-                          allowedExtensions: ['pdf', 'doc', 'docx'],
+                          allowedExtensions: ['pdf', 'docx'],
                         );
                         if (result.isEmpty) return;
                         final file = result.first;
@@ -554,6 +570,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         setState(() {
                           _resumePath = resumePathToSave;
+                          _resumeText = extraction.text;
                         });
                         if (!context.mounted) return;
                         final messenger = ScaffoldMessenger.of(context);
@@ -647,6 +664,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
+                    if (_resumeText != null && _resumeText!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: _isAutofilling ? null : _runAutofill,
+                          icon: _isAutofilling
+                              ? SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: colors.primaryPurple),
+                                )
+                              : Icon(Icons.auto_awesome, color: colors.primaryPurple, size: 20),
+                          label: Text(
+                            _isAutofilling ? 'Reading your resume…' : 'Auto-fill from Resume',
+                            style: TextStyle(
+                              fontFamily: 'Be Vietnam Pro',
+                              fontFamilyFallback: const ['sans-serif'],
+                              fontWeight: FontWeight.bold,
+                              color: colors.primaryPurple,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: colors.primaryPurple),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                   const SizedBox(height: 24),
                   SizedBox(
@@ -810,6 +857,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final newName = user['name'] as String?;
     final newResume = user['resume_path'] as String?;
+    final newResumeText = user['resume_text'] as String?;
     final newPhoto = user['photo_path'] as String?;
     final newYear = (user['year_of_study'] as String?) ?? _selectedYear;
     final newDegree = (user['degree'] as String?) ?? '';
@@ -831,15 +879,182 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_fullName != newName ||
         _resumePath != newResume ||
+        _resumeText != newResumeText ||
         _photoPath != newPhoto ||
         _selectedYear != newYear) {
       setState(() {
         _fullName = newName;
         _resumePath = newResume;
+        _resumeText = newResumeText;
         _photoPath = newPhoto;
         _selectedYear = newYear;
       });
     }
+  }
+
+  /// Calls Gemini to suggest values for Year of Study, Key Skills, and
+  /// Career Goals based on the uploaded resume text, then shows a review
+  /// dialog so the user can pick exactly which suggestions to accept.
+  ///
+  /// This never writes to the database and never touches a controller by
+  /// itself — accepted suggestions are only applied to local state, and
+  /// the user still has to tap "Save Profile" afterward to persist them.
+  /// Nothing here overrides a field the user hasn't explicitly agreed to.
+  Future<void> _runAutofill() async {
+    final resumeText = _resumeText?.trim() ?? '';
+    if (resumeText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload a resume first so there\'s something to read from.')),
+      );
+      return;
+    }
+
+    setState(() => _isAutofilling = true);
+
+    final suggestion = await ProfileAutofillService.instance.suggestProfileFields(
+      resumeText: resumeText,
+      validYearOptions: _yearOptions,
+      existingSkills: _skills,
+    );
+
+    if (!mounted) return;
+    setState(() => _isAutofilling = false);
+
+    if (suggestion == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Couldn\'t generate suggestions from this resume. Please try again.')),
+      );
+      return;
+    }
+
+    final newSkills = suggestion.skills
+        .where((s) => !_skills.any((existing) => existing.toLowerCase() == s.toLowerCase()))
+        .toList();
+
+    if (suggestion.yearOfStudy == null && newSkills.isEmpty && suggestion.careerGoals == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nothing new to suggest — your profile already covers what\'s in the resume.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    await _showAutofillReviewDialog(
+      suggestedYear: suggestion.yearOfStudy,
+      newSkills: newSkills,
+      suggestedGoals: suggestion.careerGoals,
+    );
+  }
+
+  /// Shows the suggestions with a checkbox per field/skill, all defaulting
+  /// to UNCHECKED so nothing gets overwritten unless the user actively
+  /// opts in. Tapping "Apply Selected" only updates local controllers/state
+  /// — it does not save to the database.
+  Future<void> _showAutofillReviewDialog({
+    required String? suggestedYear,
+    required List<String> newSkills,
+    required String? suggestedGoals,
+  }) async {
+    bool applyYear = false;
+    bool applyGoals = false;
+    final selectedSkills = <String>{};
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Review suggestions from your resume'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Nothing is saved yet — pick what you\'d like to apply, then still tap Save Profile.',
+                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                    ),
+                    const SizedBox(height: 12),
+                    if (suggestedYear != null)
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: applyYear,
+                        onChanged: (v) => setDialogState(() => applyYear = v ?? false),
+                        title: const Text('Year of Study'),
+                        subtitle: Text('Set to "$suggestedYear"'),
+                      ),
+                    if (newSkills.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8, bottom: 4),
+                        child: Text('Key Skills found in resume', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      ...newSkills.map(
+                        (skill) => CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          dense: true,
+                          value: selectedSkills.contains(skill),
+                          onChanged: (v) => setDialogState(() {
+                            if (v == true) {
+                              selectedSkills.add(skill);
+                            } else {
+                              selectedSkills.remove(skill);
+                            }
+                          }),
+                          title: Text(skill),
+                        ),
+                      ),
+                    ],
+                    if (suggestedGoals != null) ...[
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: applyGoals,
+                        onChanged: (v) => setDialogState(() => applyGoals = v ?? false),
+                        title: const Text('Career Goals'),
+                        subtitle: Text('"$suggestedGoals"'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      if (applyYear && suggestedYear != null) {
+                        _selectedYear = suggestedYear;
+                      }
+                      if (selectedSkills.isNotEmpty) {
+                        for (final skill in selectedSkills) {
+                          if (!_skills.any((s) => s.toLowerCase() == skill.toLowerCase())) {
+                            _skills.add(skill);
+                          }
+                        }
+                      }
+                      if (applyGoals && suggestedGoals != null) {
+                        _careerGoalsController.text = suggestedGoals;
+                      }
+                    });
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Suggestions applied. Tap "Save Profile" to keep them.')),
+                    );
+                  },
+                  child: const Text('Apply Selected'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
 

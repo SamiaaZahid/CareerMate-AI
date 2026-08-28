@@ -130,6 +130,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 24),
+                tooltip: 'AI Career Chat',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChatScreen(),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
                 icon: const Icon(Icons.person_rounded, color: Colors.white, size: 26),
                 tooltip: 'Profile',
                 onPressed: () async {

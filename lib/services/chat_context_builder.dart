@@ -8,7 +8,7 @@ import 'auth_service.dart';
 /// fresh from live app data every time it's called.
 ///
 /// This is written to be generic on purpose:
-/// - Any JSON file dropped into lib/data/ is picked up automatically,
+/// - Any JSON file dropped into assets/data/ is picked up automatically,
 ///   whatever it's named and whatever fields it contains.
 /// - Any field on the logged-in user's profile row is included
 ///   automatically, whatever it's called — so a new column added to the
@@ -51,7 +51,17 @@ not available yet rather than guessing.
       'You also have real actions available as tools (for example, '
       'turning dark mode on or off) — when the user asks you to do '
       'something you have a tool for, actually call it rather than just '
-      'describing how they could do it themselves.',
+      'describing how they could do it themselves.\n\n'
+      'If the CURRENT USER section below includes resume text, actually '
+      'read it and use it: when the user asks about internships, '
+      'scholarships, or "is this a good fit for me", compare what the '
+      'resume actually shows (skills, experience, education, projects) '
+      'against each opportunity\'s listed requirements in APP DATA, and '
+      'say plainly which ones are a good match and why, and which ones '
+      'are a stretch or a mismatch and why — don\'t just list opportunities '
+      'without judging fit. If the resume text is missing (even if a '
+      'resume file is on record), say you can\'t read its contents yet '
+      'and suggest re-uploading it, rather than answering generically.',
     );
     buffer.writeln();
     buffer.writeln('--- ABOUT THE APP ---');
@@ -89,17 +99,18 @@ not available yet rather than guessing.
     return result.isEmpty ? 'This user has not filled in a profile yet.' : result;
   }
 
-  /// Discovers every JSON file under lib/data/ via the asset manifest,
+  /// Discovers every JSON file under assets/data/ via the asset manifest,
   /// loads each one, and describes its contents generically. A teammate
   /// adding a new data file (e.g. scholarships.json, skill_roadmap.json)
-  /// needs no code change here — it's picked up on the next app run.
+  /// needs no code change here — it's picked up on the next app run, as
+  /// long as it's declared under assets/data/ in pubspec.yaml.
   static Future<String> _buildDataFilesContext() async {
     try {
       final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
 
       final dataFiles = assetManifest
           .listAssets()
-          .where((path) => path.startsWith('lib/data/') && path.endsWith('.json'))
+          .where((path) => path.startsWith('assets/data/') && path.endsWith('.json'))
           .toList()
         ..sort();
 

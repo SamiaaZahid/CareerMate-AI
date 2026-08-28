@@ -17,13 +17,19 @@ class ChatTools {
   static const List<Map<String, dynamic>> declarations = [
     {
       'name': 'set_dark_mode',
-      'description': 'Turns dark mode on or off in the app.',
+      'description':
+          'Turns dark mode on or off in the app (this also controls light mode: '
+          'turning dark mode off is the same as turning light mode on, and vice versa). '
+          'Use this whenever the user asks to switch to dark mode, light mode, '
+          'or otherwise change the app\'s color theme.',
       'parameters': {
         'type': 'OBJECT',
         'properties': {
           'enabled': {
             'type': 'BOOLEAN',
-            'description': 'true to turn dark mode on, false to turn it off.',
+            'description':
+                'true to turn dark mode on (light mode off), false to turn '
+                'dark mode off (light mode on).',
           },
         },
         'required': ['enabled'],
@@ -43,8 +49,20 @@ class ChatTools {
     return executor(args);
   }
 
+  /// Reads a bool out of [args] defensively. Gemini's function-call
+  /// arguments are expected to come back as a real bool, but if a string
+  /// like "true"/"false" (or a stray num like 1/0) ever slips through
+  /// instead, this still resolves it correctly instead of silently
+  /// defaulting to false.
+  static bool _readBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.trim().toLowerCase() == 'true';
+    if (value is num) return value != 0;
+    return false;
+  }
+
   static Future<String> _setDarkMode(Map<String, dynamic> args) async {
-    final enabled = args['enabled'] == true;
+    final enabled = _readBool(args['enabled']);
     await ThemeService.instance.setDarkMode(enabled);
     return enabled ? 'Dark mode has been turned on.' : 'Dark mode has been turned off.';
   }

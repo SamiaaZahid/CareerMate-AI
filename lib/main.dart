@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -26,7 +26,7 @@ void main() async {
 
   await Supabase.initialize(
     url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+    publishableKey: supabaseAnonKey,
   );
 
   await AuthService.instance.init();
