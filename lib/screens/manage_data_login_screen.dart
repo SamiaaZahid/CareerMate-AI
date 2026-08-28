@@ -107,8 +107,8 @@ class _ManageDataLoginScreenState extends State<ManageDataLoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() => _obscurePassword = !_obscurePassword);
