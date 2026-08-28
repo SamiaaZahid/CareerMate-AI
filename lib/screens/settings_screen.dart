@@ -148,10 +148,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 leading: Container(
                                   width: 42,
                                   height: 42,
@@ -210,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
-                        ),
+                        ), ),
                         const SizedBox(height: 24),
                         Text('Preferences & Support', style: _sectionStyle(colors)),
                         const SizedBox(height: 12),
@@ -227,9 +231,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
-                          child: Column(
-                            children: [
-                              SwitchListTile(
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              children: [
+                                SwitchListTile(
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 secondary: Container(
                                   width: 42,
@@ -354,7 +362,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ],
                           ),
-                        ),
+                        ), ),
                         const SizedBox(height: 24),
                         Text('About App', style: _sectionStyle(colors)),
                         const SizedBox(height: 12),
