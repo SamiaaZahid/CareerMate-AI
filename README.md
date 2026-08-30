@@ -20,7 +20,8 @@ Students and Learners looking for guidance on career planning, resume building, 
 * **Internship Recommendations** – Discover internships matched to your profile
 * **Scholarship Recommendations** – Find scholarships suited to your background
 * **Skill Roadmap** – Get a personalized learning path to build in-demand skills
-* **AI Career Chat** – Chat with an AI assistant for career guidance
+* **AI Career Chat** – Chat with an AI assistant for career guidance, powered by Google Gemini
+* **Admin Panel** – A hidden, admin-only screen for managing internship, scholarship, and skill roadmap listings without touching code (see below)
 
 ## **User Journey**
 
@@ -34,23 +35,39 @@ Students and Learners looking for guidance on career planning, resume building, 
 ## **Tech Stack**
 
 * **Frontend:** Flutter (Dart)
-* **Data:** JSON (local sample data for internships/scholarships)
+* **AI:** Google Gemini API (AI Career Chat, Resume Analysis)
+* **Database (Live Data):** Supabase (internships, scholarships, skill roadmaps)
+* **Local Storage:** SQLite (student accounts, kept separate from admin data)
 * **Version Control:** Git & GitHub
+
+## **How the Admin Panel Works**
+
+The app has two sides:
+
+1. **The student side** – where users log in, upload resumes, and view internships/scholarships.
+2. **The admin side** – a hidden screen, accessible only to the team, where internships, scholarships, and skill roadmaps can be added, edited, or deleted through a simple form. No coding required.
+
+**Why this was built:** Previously, all internship and scholarship data was stored in static JSON files inside the app's code. Adding or updating a listing meant editing code and pushing it to GitHub, which wasn't practical for teammates less comfortable with that process.
+
+**How it works:**
+
+* Built using **Supabase**, a free cloud database (project name: "MAD Team 4"), acting like an online spreadsheet built for apps.
+* Three tables were created: one each for internships, scholarships, and skill roadmaps.
+* All existing data was migrated from the old JSON files into these tables.
+* The Flutter app now fetches live data from Supabase instead of reading fixed local files, so updates appear for everyone instantly.
+* A "Manage Data" screen was added inside Settings, accessible only with a shared admin login (`admin@careermateai.com`). Any team member can log in with this account to add, edit, or delete listings through a form.
+* Permission rules (Row Level Security / RLS) ensure anyone can view the data, but only an admin-authenticated user can modify it.
+* Admin data is kept completely separate from student accounts, which remain stored locally on each device (SQLite), so personal user data and admin-managed content never mix.
+
+In short: instead of hardcoding opportunities into the app, there is now a live, editable database that any team member can update without opening the code.
 
 ## **Future Scope**
 
-* **Admin Panel** – A backend interface to manage and update internship listings, scholarship data, and monitor platform usage. Since internship/scholarship recommendations rely on underlying data, an admin panel will be required in a later phase to keep this data current without hardcoding it into the app.
-* **Live AI Integration** – Connecting the AI Resume Analysis and AI Career Chat features to a real AI API.
+* Expanding admin capabilities to include usage analytics and moderation tools.
 
 ## **Project Status**
 
-This project has progressed to Week 3. The app now pulls internship and scholarship data from a local JSON file instead of hardcoded text, and includes a working feedback form with input validation.
-
-## **What's New This Week (Week 3)**
-
-* **JSON Data Integration** – Program Listing and Program Details screens now fetch data from a local JSON file (`lib/data/internships.json`) instead of hardcoded lists.
-* **Feedback Form** – Added a working feedback form with input validation (empty field checks, email format validation).
-* **Loading State** – Added a loading indicator while JSON data is being fetched, for a smoother user experience.
+This project is complete as of Week 4. The app now includes a working AI Career Chat (Gemini-powered), real AI-driven resume analysis, a live Supabase-backed database for internships/scholarships/skill roadmaps, an admin management panel, and a working feedback form with validation.
 
 ## **Team**
 
@@ -68,35 +85,30 @@ flutter run
 * **Step 1:** Login/Signup
 * **Step 2:** Home (Dashboard)
 * **Step 3:** Profile (with CV Upload)
-* **Step 4:** Resume Analysis & Recommendations (now JSON-powered)
-* **Step 5:** Skill Roadmap / AI Chat
+* **Step 4:** Resume Analysis & Recommendations (AI-powered, live data from Supabase)
+* **Step 5:** Skill Roadmap / AI Career Chat
+* **Step 6 (Admin only):** Settings → Manage Data → Add/Edit/Delete listings
 
 ## **App Screenshots**
 
-Screenshots of the working prototype showing the four core screens and navigation flow.
+Screenshots of the final app showing all core screens, navigation flow, and the admin panel.
 
 ### Login Screen
-
-<img width="1417" height="896" alt="1000317735" src="https://github.com/user-attachments/assets/db6fea93-ff2a-4d98-8814-c544c19bd301" />
-
-<img width="1411" height="888" alt="1000317738" src="https://github.com/user-attachments/assets/fbfb7926-84ba-4047-8110-0b232904099f" />
 
 
 ### Home / Dashboard
 
-<img width="609" height="937" alt="Screenshot 2026-08-17 003645" src="https://github.com/user-attachments/assets/56a78b57-283f-449b-8312-c27344654011" />
 
-
-### Program Listing
-
-<img width="1374" height="903" alt="1000317734" src="https://github.com/user-attachments/assets/030fafcb-a2bf-483b-8e74-3b9380efc951" />
+### Program Listing (Live Data)
 
 
 ### Program Details
 
-<img width="1410" height="900" alt="1000317733" src="https://github.com/user-attachments/assets/0b5e8c40-43db-4a62-9c2a-795c93f42026" />
 
 ### Feedback Form
-<img width="619" height="820" alt="1000317739" src="https://github.com/user-attachments/assets/75f57bda-576d-4b3c-a8ba-2dd0e2ccfc3b" />
 
 
+### AI Career Chat
+
+
+### Admin – Manage Data
