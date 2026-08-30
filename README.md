@@ -6,7 +6,7 @@
 
 ## **Problem Statement**
 
-Students often struggle to navigate their career paths — building an effective resume, finding relevant internships, identifying scholarship opportunities, and planning the right skills to learn. CareerMate AI addresses this gap by bringing all these tools into a single, easy-to-use platform.
+Students often struggle to navigate their career paths, building an effective resume, finding relevant internships, identifying scholarship opportunities, and planning the right skills to learn. CareerMate AI addresses this gap by bringing all these tools into a single, easy-to-use platform.
 
 ## **Target Users**
 
@@ -94,21 +94,31 @@ flutter run
 Screenshots of the final app showing all core screens, navigation flow, and the admin panel.
 
 ### Login Screen
+<img width="1453" height="906" alt="Screenshot 2026-08-30 145158" src="https://github.com/user-attachments/assets/72853859-1379-46c0-b3fb-3f6f18a6ffe0" />
 
 
 ### Home / Dashboard
 
+<img width="1288" height="886" alt="Screenshot 2026-08-30 145422" src="https://github.com/user-attachments/assets/7708ef5f-7c22-4ca8-9edf-63b1096ba0c9" />
 
 ### Program Listing (Live Data)
+<img width="1285" height="842" alt="Screenshot 2026-08-30 145737" src="https://github.com/user-attachments/assets/02295803-38b0-4fa1-8d86-6e59034dcb7d" />
 
 
 ### Program Details
+<img width="1275" height="870" alt="Screenshot 2026-08-30 145808" src="https://github.com/user-attachments/assets/613e5f0b-b026-4dce-9b7f-b03e6d5accb8" />
 
 
 ### Feedback Form
+<img width="1286" height="852" alt="Screenshot 2026-08-30 145836" src="https://github.com/user-attachments/assets/e1b002b0-f49c-4773-acd2-5d46cea51973" />
 
 
 ### AI Career Chat
+<img width="1287" height="847" alt="Screenshot 2026-08-30 145634" src="https://github.com/user-attachments/assets/05229889-062c-42c0-8d5e-70f3c3e50265" />
 
 
 ### Admin – Manage Data
+
+<img width="1267" height="847" alt="Screenshot 2026-08-30 145859" src="https://github.com/user-attachments/assets/758f2ab7-b8ab-44fa-ac9a-55edb59f7169" />
+<img width="1281" height="847" alt="Screenshot 2026-08-30 150130" src="https://github.com/user-attachments/assets/4053bed1-983b-42f0-8e9f-c739039fd7a8" />
+
